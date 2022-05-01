@@ -1,10 +1,11 @@
 import axios from 'axios';
-import * as ResponseStatus from '../Entities/ResponseStatus';
+import * as ResponseStatus from '../entities/responseStatus';
 
 export default ((setUser) => {
     const instance = axios.create({
         headers: {
-            'Accept-Language': 'en-US'
+            'Accept-Language': 'en-US',
+            'Access-Control-Allow-Origin': '*'
         }
     });
 
@@ -30,4 +31,4 @@ export default ((setUser) => {
         getInstance: url => getInstance(url),
         setAccessToken: token => setAccessToken(token)
     }
-})();
+});
