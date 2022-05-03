@@ -9,7 +9,7 @@ function AuthProvider({children}) {
     const [loadingAuth, setLoadingAuth] = useState(false);
     const [loading, setLoading] = useState(true);
     const axios = Axios(setUser);
-    const API = axios.getInstance(Endpoints.BASE_ENDPOINT);
+    const API = axios.getInstance;
 
     useEffect(() => {
         loadStorage();
@@ -25,17 +25,25 @@ function AuthProvider({children}) {
 
     
     async function signIn(email, password) {
-        await API.post(Endpoints.USERS_LOGIN, {email: email, password: password})
+        await API(Endpoints.BASE_ENDPOINT).post(Endpoints.USERS_LOGIN, {email: email, password: password})
             .then(response => {
-                axios.setAccessToken(response.headers.authorization);
-                setUser(true);
+                setUser(response.data);
+                localStorage.setItem('logged-user', JSON.stringify(response.data));
             })
             .catch(error => ({ error }));
     }
 
+    async function signOut() {
+        await API(Endpoints.BASE_ENDPOINT, user.token).post(Endpoints.USERS_LOGOUT, { toke: user.token })
+            .then( () => {
+                setUser(null);
+                localStorage.removeItem('logged-user');
+            })
+            .catch(error => ({ error }));
+    }
 
     return (
-        <AuthContext.Provider value={{ signed: !!user, user, loading, API, signIn}}>
+        <AuthContext.Provider value={{ signed: !!user, user, setUser, loading, API, signIn, signOut}}>
             {children}
         </AuthContext.Provider>
     );

@@ -16,6 +16,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { mainListItems, secondaryListItems } from './listitems';
+import { AuthContext } from '../../contexts/auth';
 
 const drawerWidth = 240;
 
@@ -67,8 +68,15 @@ const mdTheme = createTheme();
 
 function DashboardContent() {
   const [open, setOpen] = React.useState(true);
+  const { signOut } = React.useContext(AuthContext); 
+
   const toggleDrawer = () => {
     setOpen(!open);
+  };
+
+  const handleSignOut = (event) => {
+    event.preventDefault();
+    signOut();
   };
 
   return (
@@ -107,7 +115,7 @@ function DashboardContent() {
                 <NotificationsIcon />
               </Badge>
             </IconButton>
-            <IconButton color="inherit">
+            <IconButton onClick={handleSignOut} color="inherit">
               <LogoutIcon/>
             </IconButton>
           </Toolbar>
