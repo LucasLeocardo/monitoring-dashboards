@@ -34,13 +34,10 @@ function AuthProvider({children}) {
                     localStorage.setItem('logged-user', JSON.stringify(response.data));
                 }
                 else {
-                    toast.error('Invalid email or password!');
+                    toast.warning('Invalid email or password!');
                 }
             })
-            .catch(error => {
-                toast.error('There was an error logging in!');
-                console.log(error);
-            });
+            .catch(error => ( error ));
     }
 
     async function signOut() {
@@ -50,10 +47,7 @@ function AuthProvider({children}) {
                 localStorage.removeItem('logged-user');
                 toast.success('Logout successfully!');
             })
-            .catch(error => {
-                toast.error('There was an error logging out!');
-                console.log(error);
-            });
+            .catch(error => ( error ));
     }
 
     return (
