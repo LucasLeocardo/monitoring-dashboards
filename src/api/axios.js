@@ -15,6 +15,7 @@ export default ((setUser) => {
         error => {
             if (error.status === ResponseStatus.UNAUTHORIZED) {
                 setUser(null);
+                localStorage.removeItem('logged-user');
             }
             return error;
         }

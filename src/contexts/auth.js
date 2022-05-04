@@ -1,6 +1,7 @@
 import { useState, createContext, useEffect } from 'react';
 import Axios from '../api/axios';
 import * as Endpoints from '../entities/endPoints';
+import { toast } from 'react-toastify';
 
 export const AuthContext = createContext({});
 
@@ -17,7 +18,7 @@ function AuthProvider({children}) {
 
     function loadStorage() {
         const storageUser = localStorage.getItem('logged-user');
-        if (storageUser) {
+        if (storageUser && storageUser !== 'undefined') {
             setUser(JSON.parse(storageUser));
         } 
         setLoading(false);
@@ -27,10 +28,19 @@ function AuthProvider({children}) {
     async function signIn(email, password) {
         await API(Endpoints.BASE_ENDPOINT).post(Endpoints.USERS_LOGIN, {email: email, password: password})
             .then(response => {
-                setUser(response.data);
-                localStorage.setItem('logged-user', JSON.stringify(response.data));
+                if (response.data) {
+                    toast.success('Welcome to the platform!');
+                    setUser(response.data);
+                    localStorage.setItem('logged-user', JSON.stringify(response.data));
+                }
+                else {
+                    toast.error('Invalid email or password!');
+                }
             })
-            .catch(error => ({ error }));
+            .catch(error => {
+                toast.error('There was an error logging in!');
+                console.log(error);
+            });
     }
 
     async function signOut() {
@@ -38,8 +48,12 @@ function AuthProvider({children}) {
             .then( () => {
                 setUser(null);
                 localStorage.removeItem('logged-user');
+                toast.success('Logout successfully!');
             })
-            .catch(error => ({ error }));
+            .catch(error => {
+                toast.error('There was an error logging out!');
+                console.log(error);
+            });
     }
 
     return (
