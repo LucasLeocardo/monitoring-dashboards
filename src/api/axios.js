@@ -5,8 +5,7 @@ export default ((setUser) => {
 
     const instance = axios.create({
         headers: {
-            'Accept-Language': 'en-US',
-            'Access-Control-Allow-Origin': '*'
+            'Accept-Language': 'en-US'
         }
     });
 
