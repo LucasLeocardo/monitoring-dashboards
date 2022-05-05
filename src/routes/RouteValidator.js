@@ -1,15 +1,15 @@
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthContext } from "../contexts/auth";
+import Loading from "../components/Loading/Loading";
 
 export default function RouteValidator({ children, isPrivate }){
 
-    const isLoading = false;
     const {signed, loading} = useContext(AuthContext); 
 
-    if(isLoading) {
+    if(loading) {
         return(
-            <div></div>
+            <Loading/>
         );
     }
 
