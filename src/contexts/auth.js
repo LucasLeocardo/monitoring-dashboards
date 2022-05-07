@@ -7,7 +7,6 @@ export const AuthContext = createContext({});
 
 function AuthProvider({children}) {
     const [user, setUser] = useState(null);
-    const [loadingAuth, setLoadingAuth] = useState(false);
     const [loading, setLoading] = useState(true);
     const axios = Axios(setUser);
     const API = axios.getInstance;
@@ -21,11 +20,11 @@ function AuthProvider({children}) {
         if (storageUser && storageUser !== 'undefined') {
             setUser(JSON.parse(storageUser));
         } 
-        setLoading(false);
     }
 
     
     async function signIn(email, password) {
+        toast.info('Logging in...');
         await API(Endpoints.BASE_ENDPOINT).post(Endpoints.USERS_LOGIN, {email: email, password: password})
             .then(response => {
                 if (response.data) {
@@ -33,14 +32,12 @@ function AuthProvider({children}) {
                     setUser(response.data);
                     localStorage.setItem('logged-user', JSON.stringify(response.data));
                 }
-                else {
-                    toast.warning('Invalid email or password!');
-                }
             })
             .catch(error => ( error ));
     }
 
     async function signOut() {
+        toast.info('Logging out...');
         await API(Endpoints.BASE_ENDPOINT, user.token).post(Endpoints.USERS_LOGOUT, { toke: user.token })
             .then( () => {
                 setUser(null);

@@ -13,11 +13,14 @@ export default ((setUser) => {
     instance.interceptors.response.use(
         response => response,
         error => {
-            if (error.status === ResponseStatus.UNAUTHORIZED) {
+            if (error.response.status === ResponseStatus.UNAUTHORIZED) {
                 toast.warning('Your session has expired, you are being logged out!');
                 setUser(null);
                 localStorage.removeItem('logged-user');
             } 
+            else if (error.response.status === ResponseStatus.NOT_ACCEPTABLE) {
+                toast.warning('Invalid email or password!');
+            }
             else {
                 toast.error('There was an error in the application!');
             }

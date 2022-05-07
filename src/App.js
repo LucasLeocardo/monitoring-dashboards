@@ -10,7 +10,7 @@ function App() {
       <BrowserRouter>
         <ToastContainer 
           position='bottom-center'
-          autoClose={3000}
+          autoClose={2000}
         />
         <Routes/>
       </BrowserRouter>

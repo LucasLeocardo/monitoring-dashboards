@@ -66,7 +66,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 const mdTheme = createTheme();
 
-function DashboardContent() {
+function DashboardContent({ content }) {
   const [open, setOpen] = React.useState(true);
   const { signOut } = React.useContext(AuthContext); 
 
@@ -154,6 +154,7 @@ function DashboardContent() {
         >
           <Toolbar />
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            {content}
           </Container>
         </Box>
       </Box>
@@ -161,6 +162,6 @@ function DashboardContent() {
   );
 }
 
-export default function Dashboard() {
-  return <DashboardContent />;
+export default function Dashboard({ children }) {
+  return <DashboardContent content={children}/>;
 }

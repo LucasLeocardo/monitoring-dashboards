@@ -20,7 +20,7 @@ export const mainListItems = (
       <ListItemIcon>
         <PersonAddAltIcon/>
       </ListItemIcon>
-      <ListItemText primary="Create new user" />
+      <ListItemText primary="Manage users" />
     </ListItemButton>
     <ListItemButton>
       <ListItemIcon>

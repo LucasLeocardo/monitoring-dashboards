@@ -1,17 +1,30 @@
-import { Routes, Route } from 'react-router-dom';
-import RouteValidator from './RouteValidator';
-import SignIn from '../pages/SignIn';
-import SignUp from '../pages/SignUp';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import MuiSignIn from '../pages/MuiSignIn';
 import Dashboard from '../pages/Dashboard';
+import { useContext } from "react";
+import { AuthContext } from "../contexts/auth";
 
 
 export default function RoutesCreator(){
-    return(
-        <Routes>
-            <Route exact path="/" element={<RouteValidator><MuiSignIn/></RouteValidator>}/>
-            <Route exact path="/register" element={<RouteValidator><SignUp/></RouteValidator>}/>
-            <Route exact path="/dashboard" element={<RouteValidator isPrivate={true}><Dashboard/></RouteValidator>}/>
-        </Routes>
-    );
+
+    const { signed } = useContext(AuthContext); 
+
+    if (signed) {
+        return(
+            <Dashboard>
+                <Routes>
+                    <Route exact path="/"/>
+                </Routes>
+            </Dashboard>
+        );
+    }
+    else {
+        return (
+            <Routes>
+                <Route exact path="/" element={<MuiSignIn/>} />
+                <Route exact path="/*" element={<Navigate to="/"/>} />
+            </Routes>
+        );
+    }
+
 }
