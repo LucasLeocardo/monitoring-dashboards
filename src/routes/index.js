@@ -3,6 +3,9 @@ import MuiSignIn from '../pages/MuiSignIn';
 import Dashboard from '../pages/Dashboard';
 import { useContext } from "react";
 import { AuthContext } from "../contexts/auth";
+import ManageUsers from '../components/ManageUsers/ManageUsers';
+import ManageDevices from '../components/ManageDevices/ManageDevices';
+import MainDashboard from '../components/MainDashboard/MainDashboard';
 
 
 export default function RoutesCreator(){
@@ -13,7 +16,9 @@ export default function RoutesCreator(){
         return(
             <Dashboard>
                 <Routes>
-                    <Route exact path="/"/>
+                    <Route exact path="/" element={<MainDashboard/>}/>
+                    <Route exact path="/manage-users" element={<ManageUsers/>}/>
+                    <Route exact path="/manage-devices" element={<ManageDevices/>}/>
                 </Routes>
             </Dashboard>
         );

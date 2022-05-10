@@ -15,8 +15,16 @@ import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { mainListItems, secondaryListItems } from './listitems';
 import { AuthContext } from '../../contexts/auth';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import ListSubheader from '@mui/material/ListSubheader';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import DeviceHubIcon from '@mui/icons-material/DeviceHub';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 240;
 
@@ -68,7 +76,8 @@ const mdTheme = createTheme();
 
 function DashboardContent({ content }) {
   const [open, setOpen] = React.useState(true);
-  const { signOut } = React.useContext(AuthContext); 
+  const { signOut, selectedPage } = React.useContext(AuthContext); 
+  const navigate = useNavigate();
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -78,6 +87,37 @@ function DashboardContent({ content }) {
     event.preventDefault();
     signOut();
   };
+
+  const isDashboardSelected = () => {
+    return selectedPage === 'Main Dashboard';
+  };
+
+  const isManageUsersSelected = () => {
+    return selectedPage === 'Manage users';
+  };
+
+  const isManageDevicesSelected = () => {
+    return selectedPage === 'Manage devices';
+  };
+
+  const isEditProfileSelected = () => {
+    return selectedPage === 'Edit my profile';
+  };
+
+  const handleDashboardClicked = (event) => {
+    event.preventDefault();
+    navigate('/');
+  }
+
+  const handleManageUsersClicked = (event) => {
+    event.preventDefault();
+    navigate('/manage-users');
+  }
+
+  const handleManageDevicesClicked = (event) => {
+    event.preventDefault();
+    navigate('/manage-devices');
+  }
 
   return (
     <ThemeProvider theme={mdTheme}>
@@ -135,9 +175,38 @@ function DashboardContent({ content }) {
           </Toolbar>
           <Divider />
           <List component="nav">
-            {mainListItems}
+          <React.Fragment>
+            <ListItemButton onClick={handleDashboardClicked} selected={isDashboardSelected()}>
+              <ListItemIcon>
+                <DashboardIcon />
+              </ListItemIcon>
+              <ListItemText primary="Dashboard" />
+            </ListItemButton>
+            <ListItemButton onClick={handleManageUsersClicked} selected={isManageUsersSelected()}>
+              <ListItemIcon>
+                <PersonAddAltIcon/>
+              </ListItemIcon>
+              <ListItemText primary="Manage users" />
+            </ListItemButton>
+            <ListItemButton onClick={handleManageDevicesClicked} selected={isManageDevicesSelected()}>
+              <ListItemIcon>
+                <DeviceHubIcon/>
+              </ListItemIcon>
+              <ListItemText primary="Manage devices" />
+            </ListItemButton>
+          </React.Fragment>
             <Divider sx={{ my: 1 }} />
-            {secondaryListItems}
+            <React.Fragment>
+              <ListSubheader component="div" inset>
+                Profile section
+              </ListSubheader>
+              <ListItemButton disabled={true} selected={isEditProfileSelected()}>
+                <ListItemIcon>
+                  <PersonOutlineIcon />
+                </ListItemIcon>
+                <ListItemText primary="Edit my profile" />
+              </ListItemButton>
+            </React.Fragment>
           </List>
         </Drawer>
         <Box
