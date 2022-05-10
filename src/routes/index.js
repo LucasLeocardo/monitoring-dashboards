@@ -10,7 +10,7 @@ import MainDashboard from '../components/MainDashboard/MainDashboard';
 
 export default function RoutesCreator(){
 
-    const { signed } = useContext(AuthContext); 
+    const { signed, loadingAuth } = useContext(AuthContext); 
 
     if (signed) {
         return(
@@ -23,7 +23,7 @@ export default function RoutesCreator(){
             </Dashboard>
         );
     }
-    else {
+    else if (!signed && !loadingAuth) {
         return (
             <Routes>
                 <Route exact path="/" element={<MuiSignIn/>} />

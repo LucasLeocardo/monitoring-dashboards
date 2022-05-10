@@ -8,12 +8,14 @@ export const AuthContext = createContext({});
 function AuthProvider({children}) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [loadingAuth, setLoadingAuth] = useState(true);
     const [selectedPage, setSelectedPage] = useState('');
     const axios = Axios(setUser);
     const API = axios.getInstance; 
 
     useEffect(() => {
         loadStorage();
+        setLoadingAuth(false);
     }, []);
 
     function loadStorage() {
@@ -49,7 +51,7 @@ function AuthProvider({children}) {
     }
 
     return (
-        <AuthContext.Provider value={{ signed: !!user, user, setUser, loading, API, signIn, signOut, selectedPage, setSelectedPage }}>
+        <AuthContext.Provider value={{ signed: !!user, user, setUser, loading, API, signIn, signOut, selectedPage, setSelectedPage, loadingAuth }}>
             {children}
         </AuthContext.Provider>
     );

@@ -6,7 +6,10 @@ function ManageUsers() {
 
     //const [open, setOpen] = React.useState(true);
     const { API, setSelectedPage, user } = React.useContext(AuthContext); 
-    setSelectedPage('Manage users');
+
+    React.useEffect(() => {
+        setSelectedPage('Manage users');
+    }, []);
 
 
     return (

@@ -6,7 +6,10 @@ function MainDashboard() {
 
     //const [open, setOpen] = React.useState(true);
     const { API, setSelectedPage, user } = React.useContext(AuthContext); 
-    setSelectedPage('Main Dashboard');
+
+    React.useEffect(() => {
+        setSelectedPage('Main Dashboard');
+    }, []);
 
 
     return (

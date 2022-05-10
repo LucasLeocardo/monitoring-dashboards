@@ -6,12 +6,15 @@ function ManageDevices() {
 
     //const [open, setOpen] = React.useState(true);
     const { API, setSelectedPage, user } = React.useContext(AuthContext); 
-    setSelectedPage('Manage devices');
+
+    React.useEffect(() => {
+        setSelectedPage('Manage devices');
+    }, []);
 
 
     return (
         <div>
-            <h1>ManageDevices</h1>
+            <h1>Manage Devices</h1>
         </div>
     );
 
