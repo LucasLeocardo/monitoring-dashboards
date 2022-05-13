@@ -1,0 +1,11 @@
+.table-box {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.MuiContainer-root {
+    height: calc(100% - 134px);
+}
