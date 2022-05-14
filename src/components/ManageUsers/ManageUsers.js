@@ -1,41 +1,47 @@
-import { useState } from 'react';
 import { AuthContext } from '../../contexts/auth';
-import * as React from 'react';
+import { useState, useEffect, useContext } from 'react';
 import MuiUsersTable from '../MuiTable/MuiUsersTable'
 import './manageUsers.css';
 import moment from 'moment';
-
-function createData(id, name, email, phoneNumber, created_at) {
-  return {
-    id,
-    name,
-    email,
-    phoneNumber,
-    created_at,
-  };
-}
-
-const tableData = [
-    createData(1, 'Lucas Leocardo', 'Lucasleocardo.go@gmail.com', '(21) 97997-8924', moment().format("MMM Do YY"))
-    // createData(2, 'Lucas Leocardo 2', 'Lucasleocardo2.go@gmail.com', '(36) 97997-8924', moment().format("MMM Do YY")),
-    // createData(3, 'Lucas Leocardo 3', 'Lucasleocardo3.go@gmail.com', '(32) 97997-8924', moment().format("MMM Do YY")),
-    // createData(4, 'Lucas Leocardo 4', 'Lucasleocardo4.go@gmail.com', '(31) 97997-8924', moment().format("MMM Do YY"))
-];
+import Loading from '../Loading/Loading';
+import * as Endpoints from '../../entities/endPoints';
 
 function ManageUsers() {
 
-    //const [open, setOpen] = React.useState(true);
-    const { API, setSelectedPage, user } = React.useContext(AuthContext); 
+    const [loading, setLoading] = useState(true);
+    const [usersList, setUsersList] = useState([]);
+    const { API, setSelectedPage, user } = useContext(AuthContext); 
 
-    React.useEffect(() => {
+    useEffect(() => {
         setSelectedPage('Manage users');
-    }, []);
+        getUsers();
+    });
 
+    async function getUsers() {
+        await API(Endpoints.BASE_ENDPOINT, user.token).get(Endpoints.GET_USERS)
+            .then( response => {
+                if (response.data) {
+                    const users = response.data.map(user => {
+                        user['created_at'] = moment(user.created_at).format('DD/MM/YYYY');
+                        return user;
+                    });
+                    setUsersList(users);
+                }
+                setLoading(false);
+            })
+            .catch(error => ( error ));
+    }
+
+    if (!loading) {
+        return (
+            <div className='table-box'>
+                <MuiUsersTable tableData={usersList}/>
+            </div>
+        );
+    }
 
     return (
-        <div className='table-box'>
-            <MuiUsersTable tableData={tableData}/>
-        </div>
+        <Loading/>
     );
 
 }

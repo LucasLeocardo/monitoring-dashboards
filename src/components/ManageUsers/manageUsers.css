@@ -5,7 +5,3 @@
     align-items: center;
     justify-content: center;
 }
-
-.MuiContainer-root {
-    height: calc(100% - 134px);
-}
