@@ -42,7 +42,7 @@ function AuthProvider({children}) {
     async function signOut() {
         toast.info('Logging out...');
         await API(Endpoints.BASE_ENDPOINT, user.token).post(Endpoints.USERS_LOGOUT, { toke: user.token })
-            .then( () => {
+            .then( response => {
                 if (response.status === ResponseStatus.NO_CONTENT) {
                     setUser(null);
                     localStorage.removeItem('logged-user');
