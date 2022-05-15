@@ -161,7 +161,7 @@ EnhancedTableHead.propTypes = {
 };
 
 const EnhancedTableToolbar = (props) => {
-  const { numSelected } = props;
+  const { numSelected, onDeleteUsersClick } = props;
   const navigate = useNavigate();
 
   const onAddUserClick = (event) => {
@@ -202,7 +202,7 @@ const EnhancedTableToolbar = (props) => {
 
       {numSelected > 0 ? (
         <Tooltip title="Delete selected users">
-          <IconButton>
+          <IconButton onClick={onDeleteUsersClick}>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
@@ -218,11 +218,12 @@ const EnhancedTableToolbar = (props) => {
 };
 
 EnhancedTableToolbar.propTypes = {
-  numSelected: PropTypes.number.isRequired
+  numSelected: PropTypes.number.isRequired,
+  onDeleteUsersClick: PropTypes.func.isRequired
 };
 
 export default function MuiUsersTable(props) {
-  const { tableData } = props;
+  const { tableData, onDeleteUsersClick, setSelectedUsers } = props;
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('name');
   const [selected, setSelected] = React.useState([]);
@@ -262,6 +263,7 @@ export default function MuiUsersTable(props) {
     }
 
     setSelected(newSelected);
+    setSelectedUsers(newSelected);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -282,7 +284,7 @@ export default function MuiUsersTable(props) {
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar numSelected={selected.length} onDeleteUsersClick={onDeleteUsersClick} />
         <TableContainer sx={{ maxHeight: 500, minHeight: 350 }}>
           <Table
             sx={{ minWidth: 750 }}
@@ -367,5 +369,7 @@ export default function MuiUsersTable(props) {
 }
 
 MuiUsersTable.propTypes = {
-    tableData: PropTypes.array.isRequired
+    tableData: PropTypes.array.isRequired,
+    onDeleteUsersClick: PropTypes.func.isRequired,
+    setSelectedUsers: PropTypes.func.isRequired,
 };

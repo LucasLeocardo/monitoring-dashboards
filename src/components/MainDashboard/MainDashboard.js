@@ -8,7 +8,7 @@ function MainDashboard() {
 
     React.useEffect(() => {
         setSelectedPage('Main Dashboard');
-    });
+    }, []);
 
 
     return (

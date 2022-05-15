@@ -5,17 +5,26 @@ import './manageUsers.css';
 import moment from 'moment';
 import Loading from '../Loading/Loading';
 import * as Endpoints from '../../entities/endPoints';
+import ConfirmationModal from '../ConfirmationModal/ConfirmationModal'
+import { toast } from 'react-toastify';
+import * as ResponseStatus from '../../entities/responseStatus';
+
+const modalTitle = 'Do you really want to remove these users?';
+const modalTextContent = 'By clicking confirm, the selected users will be permanently removed from the platform and will no longer be able to access the landslide monitoring system.';
+
 
 function ManageUsers() {
 
     const [loading, setLoading] = useState(true);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [usersList, setUsersList] = useState([]);
+    const [selectedUsers, setSelectedUsers] = useState([]);
     const { API, setSelectedPage, user } = useContext(AuthContext); 
 
     useEffect(() => {
         setSelectedPage('Manage users');
         getUsers();
-    });
+    }, []);
 
     async function getUsers() {
         await API(Endpoints.BASE_ENDPOINT, user.token).get(Endpoints.GET_USERS)
@@ -32,10 +41,45 @@ function ManageUsers() {
             .catch(error => ( error ));
     }
 
+    async function removeUsers() {
+        await API(Endpoints.BASE_ENDPOINT, user.token).post(Endpoints.DELETE_USERS, selectedUsers)
+            .then( response => {
+                if (response.status === ResponseStatus.SUCCESS) {
+                    const newUsersList = usersList.filter(user => !selectedUsers.includes(user._id));
+                    setUsersList(newUsersList);
+                    toast.success('Users successfully deleted!');
+                }
+                setLoading(false);
+            })
+            .catch(error => ( error ));
+    }
+
+    const onDeleteUsersClick = () => {
+        setIsDeleteModalOpen(true);
+    }
+
+    const handleModalCancelClick = () => {
+        setIsDeleteModalOpen(false);
+    }
+
+    const handleModalConfirmClick = () => {
+        toast.info('Deleting selected users...');
+        setIsDeleteModalOpen(false);
+        setLoading(true);
+        removeUsers();
+    }
+
     if (!loading) {
         return (
             <div className='table-box'>
-                <MuiUsersTable tableData={usersList}/>
+                <MuiUsersTable tableData={usersList} onDeleteUsersClick={onDeleteUsersClick} setSelectedUsers={setSelectedUsers}/>
+                <ConfirmationModal
+                    modalTitle={modalTitle}
+                    modalTextContent={modalTextContent}
+                    isOpen={isDeleteModalOpen}
+                    handleConfirmClick={handleModalConfirmClick}
+                    handleCancelClick={handleModalCancelClick}
+                />
             </div>
         );
     }

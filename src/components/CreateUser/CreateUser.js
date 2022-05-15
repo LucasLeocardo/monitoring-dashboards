@@ -43,13 +43,13 @@ const theme = createTheme();
 
 export default function CreateUser() {
   const { API, setSelectedPage, user } = React.useContext(AuthContext); 
-  const [phoneText, setPhoneText] = React.useState('(100) 000-0000');
+  const [phoneText, setPhoneText] = React.useState('(10) 00000-0000');
   const [isSubmitEnabled, setIsSubmitEnabled] = React.useState(true);
   const navigate = useNavigate();
 
   React.useEffect(() => {
     setSelectedPage('Manage users');
-  });
+  }, []);
 
   const handlePhoneTextChange = (event) => {
     setPhoneText(event.target.value);
