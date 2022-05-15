@@ -2,6 +2,7 @@ import { useState, createContext, useEffect } from 'react';
 import Axios from '../api/axios';
 import * as Endpoints from '../entities/endPoints';
 import { toast } from 'react-toastify';
+import * as ResponseStatus from '../entities/responseStatus';
 
 export const AuthContext = createContext({});
 
@@ -42,9 +43,11 @@ function AuthProvider({children}) {
         toast.info('Logging out...');
         await API(Endpoints.BASE_ENDPOINT, user.token).post(Endpoints.USERS_LOGOUT, { toke: user.token })
             .then( () => {
-                setUser(null);
-                localStorage.removeItem('logged-user');
-                toast.success('Logout successfully!');
+                if (response.status === ResponseStatus.NO_CONTENT) {
+                    setUser(null);
+                    localStorage.removeItem('logged-user');
+                    toast.success('Logout successfully!');
+                }
             })
             .catch(error => ( error ));
     }
