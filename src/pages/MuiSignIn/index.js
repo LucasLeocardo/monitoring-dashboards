@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ForestIcon from '@mui/icons-material/Forest';
-
+import { toast } from 'react-toastify';
 
 const theme = createTheme();
 
@@ -27,6 +27,9 @@ export default function SignIn() {
     const password = data.get('password');
     if (email && password) {
       signIn(email, password);
+    }
+    else {
+      toast.warning('Please fill in email and password fields!');
     }
   };
 

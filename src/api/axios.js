@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as ResponseStatus from '../entities/responseStatus';
 import { toast } from 'react-toastify';
 
-export default ((setUser) => {
+const axiosCreator = (setUser) => {
 
     const instance = axios.create({
         headers: {
@@ -40,4 +40,6 @@ export default ((setUser) => {
         getInstance: (url, token = null) => getInstance(url, token)
     }
 
-});
+};
+
+export default axiosCreator;

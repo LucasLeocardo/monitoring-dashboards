@@ -19,6 +19,7 @@ import Tooltip from '@mui/material/Tooltip';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { visuallyHidden } from '@mui/utils';
+import { useNavigate } from 'react-router-dom';
 
 // function createData(name, calories, fat, carbs, protein) {
 //   return {
@@ -161,6 +162,12 @@ EnhancedTableHead.propTypes = {
 
 const EnhancedTableToolbar = (props) => {
   const { numSelected } = props;
+  const navigate = useNavigate();
+
+  const onAddUserClick = (event) => {
+    event.preventDefault();
+    navigate('/manage-users/create-user');
+  };
 
   return (
     <Toolbar
@@ -194,14 +201,14 @@ const EnhancedTableToolbar = (props) => {
       )}
 
       {numSelected > 0 ? (
-        <Tooltip title="Delete">
+        <Tooltip title="Delete selected users">
           <IconButton>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
       ) : (
         <Tooltip title="Add new user">
-          <IconButton>
+          <IconButton onClick={onAddUserClick}>
             <AddCircleOutlineIcon />
           </IconButton>
         </Tooltip>

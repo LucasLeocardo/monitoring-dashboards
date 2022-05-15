@@ -6,6 +6,7 @@ import { AuthContext } from "../contexts/auth";
 import ManageUsers from '../components/ManageUsers/ManageUsers';
 import ManageDevices from '../components/ManageDevices/ManageDevices';
 import MainDashboard from '../components/MainDashboard/MainDashboard';
+import CreateUser from '../components/CreateUser/CreateUser';
 
 
 export default function RoutesCreator(){
@@ -19,6 +20,7 @@ export default function RoutesCreator(){
                     <Route exact path="/" element={<MainDashboard/>}/>
                     <Route exact path="/manage-users" element={<ManageUsers/>}/>
                     <Route exact path="/manage-devices" element={<ManageDevices/>}/>
+                    <Route exact path="/manage-users/create-user" element={<CreateUser/>}/>
                 </Routes>
             </Dashboard>
         );
