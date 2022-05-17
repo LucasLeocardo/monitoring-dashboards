@@ -1,0 +1,11 @@
+.table-box {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#isActive {
+    padding-left: 12px;
+}
