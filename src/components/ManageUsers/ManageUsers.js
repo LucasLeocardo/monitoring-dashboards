@@ -47,6 +47,7 @@ function ManageUsers() {
                 if (response.status === ResponseStatus.SUCCESS) {
                     const newUsersList = usersList.filter(user => !selectedUsers.includes(user._id));
                     setUsersList(newUsersList);
+                    setSelectedUsers([]);
                     toast.success('Users successfully deleted!');
                 }
                 setLoading(false);

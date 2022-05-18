@@ -7,6 +7,7 @@ import ManageUsers from '../components/ManageUsers/ManageUsers';
 import ManageDevices from '../components/ManageDevices/ManageDevices';
 import MainDashboard from '../components/MainDashboard/MainDashboard';
 import CreateUser from '../components/CreateUser/CreateUser';
+import CreateDevice from '../components/CreateDevice/CreateDevice';
 
 
 export default function RoutesCreator(){
@@ -21,6 +22,7 @@ export default function RoutesCreator(){
                     <Route exact path="/manage-users" element={<ManageUsers/>}/>
                     <Route exact path="/manage-devices" element={<ManageDevices/>}/>
                     <Route exact path="/manage-users/create-user" element={<CreateUser/>}/>
+                    <Route exact path="/manage-devices/create-device" element={<CreateDevice/>}/>
                 </Routes>
             </Dashboard>
         );

@@ -28,25 +28,10 @@ import { toast } from 'react-toastify';
 import * as ResponseStatus from '../../entities/responseStatus';
 import moment from 'moment';
 import ConfirmationModal from '../ConfirmationModal/ConfirmationModal'
+import * as Endpoints from '../../entities/endPoints';
 
 const modalTitle = 'Do you really want to remove these devices?';
 const modalTextContent = 'By clicking confirm, the selected devices will be permanently removed from the system along with their field measured data.';
-
-function createData(name, _id, latitude, longitude, isActive, created_at) {
-  return {
-    name,
-    _id,
-    latitude,
-    longitude,
-    isActive,
-    created_at,
-  };
-}
-
-const rows = [
-  createData('Device Lg', '3AS45ESD', 40.877, 67.879, true, '16/05/2022'),
-  createData('Device Kc', 'AAS48796', 70.877, -67.879, false, '16/05/2022'),
-];
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -83,7 +68,7 @@ function descendingComparator(a, b, orderBy) {
       id: 'name',
       numeric: false,
       disablePadding: true,
-      label: 'Name',
+      label: 'Device Name',
     },
     {
       id: '_id',
@@ -244,18 +229,65 @@ function descendingComparator(a, b, orderBy) {
 function ManageDevices() {
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
-    const [loading, setLoading] = React.useState(false);
-    const [deviceList, setDeviceList] = React.useState(rows);
+    const [loading, setLoading] = React.useState(true);
+    const [deviceList, setDeviceList] = React.useState([]);
     const { API, setSelectedPage, user } = React.useContext(AuthContext); 
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('name');
-    const [selected, setSelected] = React.useState([]);
+    const [selectedDevices, setSelectedDevices] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
     React.useEffect(() => {
         setSelectedPage('Manage devices');
+        getDevices();
     }, []);
+
+    async function getDevices() {
+      await API(Endpoints.BASE_ENDPOINT, user.token).get(Endpoints.GET_DEVICES)
+          .then( response => {
+              if (response.data && response.status === ResponseStatus.SUCCESS) {
+                  const devices = response.data.map(device => {
+                    device['created_at'] = moment(device.created_at).format('DD/MM/YYYY');
+                      return device;
+                  });
+                  setDeviceList(devices);
+              }
+              setLoading(false);
+          })
+          .catch(error => ( error ));
+    }
+
+    async function removeDevices() {
+      await API(Endpoints.BASE_ENDPOINT, user.token).delete(Endpoints.DELETE_DEVICES, { data: { deviceIds: selectedDevices} })
+          .then( response => {
+              if (response.status === ResponseStatus.SUCCESS) {
+                  const newDeviceList = deviceList.filter(device => !selectedDevices.includes(device._id));
+                  setDeviceList(newDeviceList);
+                  setSelectedDevices([]);
+                  toast.success('Devices successfully deleted!');
+              }
+              setLoading(false);
+          })
+          .catch(error => ( error ));
+    }
+
+    function updateDeviceStatus(deviceId, newDeviceStatus) {
+      const url = `/devices/${deviceId}`;
+      API(Endpoints.BASE_ENDPOINT, user.token).put(url, { newDeviceStatus })
+          .then( response => {
+              if (response.data && response.status === ResponseStatus.SUCCESS) {
+                const newDeviceList = deviceList.map(device => {
+                  if (device._id === deviceId) {
+                      device.isActive = newDeviceStatus;
+                  }
+                  return device;
+                })
+                setDeviceList(newDeviceList);
+              }
+          })
+          .catch(error => ( error ));
+    }
 
     const handleRequestSort = (event, property) => {
       const isAsc = orderBy === property && order === 'asc';
@@ -266,30 +298,30 @@ function ManageDevices() {
     const handleSelectAllClick = (event) => {
       if (event.target.checked) {
         const newSelecteds = deviceList.map((n) => n._id);
-        setSelected(newSelecteds);
+        setSelectedDevices(newSelecteds);
         return;
       }
-      setSelected([]);
+      setSelectedDevices([]);
     };
 
     const handleClick = (event, id) => {
-      const selectedIndex = selected.indexOf(id);
+      const selectedIndex = selectedDevices.indexOf(id);
       let newSelected = [];
 
       if (selectedIndex === -1) {
-        newSelected = newSelected.concat(selected, id);
+        newSelected = newSelected.concat(selectedDevices, id);
       } else if (selectedIndex === 0) {
-        newSelected = newSelected.concat(selected.slice(1));
-      } else if (selectedIndex === selected.length - 1) {
-        newSelected = newSelected.concat(selected.slice(0, -1));
+        newSelected = newSelected.concat(selectedDevices.slice(1));
+      } else if (selectedIndex === selectedDevices.length - 1) {
+        newSelected = newSelected.concat(selectedDevices.slice(0, -1));
       } else if (selectedIndex > 0) {
         newSelected = newSelected.concat(
-          selected.slice(0, selectedIndex),
-          selected.slice(selectedIndex + 1),
+          selectedDevices.slice(0, selectedIndex),
+          selectedDevices.slice(selectedIndex + 1),
         );
       }
 
-      setSelected(newSelected);
+      setSelectedDevices(newSelected);
     };
 
     const handleChangePage = (event, newPage) => {
@@ -301,14 +333,8 @@ function ManageDevices() {
       setPage(0);
     };
 
-    const handleOnDeviceStatusChange = (id) => {
-        const newDeviceList = deviceList.map(device => {
-            if (device._id === id) {
-                device.isActive = !device.isActive;
-            }
-            return device;
-        })
-        setDeviceList(newDeviceList);
+    const handleOnDeviceStatusChange = (id, isActive) => {
+        updateDeviceStatus(id, !isActive);
     };
 
     const handleModalCancelClick = () => {
@@ -317,10 +343,11 @@ function ManageDevices() {
 
     const handleModalConfirmClick = () => {
         toast.info('Deleting selected devices...');
+        removeDevices();
         setIsDeleteModalOpen(false);
     }
 
-    const isSelected = (id) => selected.indexOf(id) !== -1;
+    const isSelected = (id) => selectedDevices.indexOf(id) !== -1;
 
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows =
@@ -336,7 +363,7 @@ function ManageDevices() {
         <div className='table-box'>
             <Box sx={{ width: '100%' }}>
                 <Paper sx={{ width: '100%', mb: 2 }}>
-                  <EnhancedTableToolbar numSelected={selected.length} setIsDeleteModalOpen={setIsDeleteModalOpen} />
+                  <EnhancedTableToolbar numSelected={selectedDevices.length} setIsDeleteModalOpen={setIsDeleteModalOpen} />
                   <TableContainer sx={{ maxHeight: 500, minHeight: 350 }}>
                     <Table
                       sx={{ minWidth: 750 }}
@@ -344,7 +371,7 @@ function ManageDevices() {
                       size={'medium'}
                     >
                       <EnhancedTableHead
-                        numSelected={selected.length}
+                        numSelected={selectedDevices.length}
                         order={order}
                         orderBy={orderBy}
                         onSelectAllClick={handleSelectAllClick}
@@ -392,7 +419,7 @@ function ManageDevices() {
                                 <TableCell padding="none">{row.latitude}</TableCell>
                                 <TableCell padding="none">{row.longitude}</TableCell>
                                 <TableCell padding="none">
-                                    <Switch checked={row.isActive} onClick={() => handleOnDeviceStatusChange(row._id)} inputProps={{ 'aria-label': 'controlled' }}/>
+                                    <Switch checked={row.isActive} onClick={() => handleOnDeviceStatusChange(row._id, row.isActive)} inputProps={{ 'aria-label': 'controlled' }}/>
                                 </TableCell>
                                 <TableCell padding="none">{row.created_at}</TableCell>
                               </TableRow>
