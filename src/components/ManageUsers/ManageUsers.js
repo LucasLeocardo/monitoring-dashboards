@@ -12,6 +12,10 @@ import * as ResponseStatus from '../../entities/responseStatus';
 const modalTitle = 'Do you really want to remove these users?';
 const modalTextContent = 'By clicking confirm, the selected users will be permanently removed from the platform and will no longer be able to access the landslide monitoring system.';
 
+const notAllowedModalTitle = 'You are not allowed to delete users!';
+const notAllowedModalTextContent = 'You are not an admin user to delete users. Please contact an admin user to perform this task.';
+
+
 
 function ManageUsers() {
 
@@ -64,6 +68,10 @@ function ManageUsers() {
     }
 
     const handleModalConfirmClick = () => {
+        if (!user.isAdmin) {
+            setIsDeleteModalOpen(false);
+            return;
+        }
         toast.info('Deleting selected users...');
         setIsDeleteModalOpen(false);
         setLoading(true);
@@ -75,8 +83,8 @@ function ManageUsers() {
             <div className='table-box'>
                 <MuiUsersTable tableData={usersList} onDeleteUsersClick={onDeleteUsersClick} setSelectedUsers={setSelectedUsers}/>
                 <ConfirmationModal
-                    modalTitle={modalTitle}
-                    modalTextContent={modalTextContent}
+                    modalTitle={user.isAdmin ? modalTitle : notAllowedModalTitle}
+                    modalTextContent={user.isAdmin ? modalTextContent : notAllowedModalTextContent}
                     isOpen={isDeleteModalOpen}
                     handleConfirmClick={handleModalConfirmClick}
                     handleCancelClick={handleModalCancelClick}

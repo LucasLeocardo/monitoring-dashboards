@@ -17,6 +17,9 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/auth';
 import { toast } from 'react-toastify';
 import * as Endpoints from '../../entities/endPoints';
+import FormLabel from '@mui/material/FormLabel';
+import * as ResponseStatus from '../../entities/responseStatus'
+
 
 const latitudeMaskCustom = React.forwardRef(function TextMaskCustom(props, ref) {
     const { onChange, ...other } = props;
@@ -24,6 +27,9 @@ const latitudeMaskCustom = React.forwardRef(function TextMaskCustom(props, ref) 
       <IMaskInput
         {...other}
         mask={Number}
+        scale={6}
+        radix="."
+        digits={1}
         min={-90}
         max={90}
         inputRef={ref}
@@ -38,11 +44,36 @@ const latitudeMaskCustom = React.forwardRef(function TextMaskCustom(props, ref) 
     onChange: PropTypes.func.isRequired,
 };
 
+const longitudeMaskCustom = React.forwardRef(function TextMaskCustom(props, ref) {
+  const { onChange, ...other } = props;
+  return (
+    <IMaskInput
+      {...other}
+      mask={Number}
+      scale={6}
+      radix="."
+      min={-180}
+      max={180}
+      inputRef={ref}
+      onAccept={(value) => onChange({ target: { name: props.name, value } })}
+      overwrite
+    />
+  );
+});
+
+longitudeMaskCustom.propTypes = {
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+};
+
 const theme = createTheme();
 
 export default function CreateDevice() {
   const { API, setSelectedPage, user } = React.useContext(AuthContext); 
-  const [phoneText, setPhoneText] = React.useState('15');
+  const [latitudeValue, setLatitudeValue] = React.useState('');
+  const [longitudeValue, setLongitudeValue] = React.useState('');
+  const [deviceId, setDeviceId] = React.useState('');
+  const [isFormFieldsEnabled, setIsFormFieldsEnabled] = React.useState(true);
   const [isSubmitEnabled, setIsSubmitEnabled] = React.useState(true);
   const navigate = useNavigate();
 
@@ -50,26 +81,21 @@ export default function CreateDevice() {
     setSelectedPage('Manage devices');
   }, []);
 
-  const handlePhoneTextChange = (event) => {
-    setPhoneText(event.target.value);
+  const handleLatitudeChange = (event) => {
+    setLatitudeValue(event.target.value);
+  };
+
+  const handleLongitudeChange = (event) => {
+    setLongitudeValue(event.target.value);
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const firstName = data.get('firstName');
-    const lastName = data.get('lastName');
-    const email = data.get('email');
-    const password = data.get('password');
-    const phoneNumber = data.get('phoneNumber');
-    const isPasswordValid = validatePassword(password);
-    if (firstName && lastName && email && password && phoneNumber && isPasswordValid) {
-        const name = firstName + ' ' + lastName;
-        const request = { name, email, password, phoneNumber };
-        addNewUser(request);
-    }
-    else if (firstName && lastName && email && password && phoneNumber && !isPasswordValid) {
-        toast.warning('Passwords must contain 6 to 10 characters!');
+    const name = data.get('name');
+    if (name && latitudeValue && longitudeValue) {
+        const request = { name, latitude: Number(latitudeValue), longitude: Number(longitudeValue) };
+        addNewDevice(request);
     }
     else {
         toast.warning('Please fill in all required fields!');
@@ -81,25 +107,19 @@ export default function CreateDevice() {
     navigate('/manage-devices');
   };
 
-  function validatePassword(password) {
-    const passwordLength = password.length;
-    let isPasswordValid = false;
-    if (passwordLength >= 6 && passwordLength <= 10) {
-        isPasswordValid = true
-    }
-    return isPasswordValid;
-  }
-
-  async function addNewUser(request) {
+  async function addNewDevice(request) {
     setIsSubmitEnabled(false);
-    toast.info('Adding new user...');
-    await API(Endpoints.BASE_ENDPOINT, user.token).post(Endpoints.CREATE_USER, request)
+    toast.info('Adding new device...');
+    await API(Endpoints.BASE_ENDPOINT, user.token).post(Endpoints.CREATE_DEVICE, request)
         .then( response => {
-            if (response.data) {
-                toast.success('User created successfully!');
-                navigate('/manage-users');
+            if (response.status === ResponseStatus.SUCCESS) {
+                setIsFormFieldsEnabled(false);
+                setDeviceId(response.data);
+                toast.success('Device created successfully!');
             }
-            setIsSubmitEnabled(true);
+            else {
+              setIsSubmitEnabled(true);
+            }
         })
         .catch(error => ( error ));
   }
@@ -129,61 +149,62 @@ export default function CreateDevice() {
           </Typography>
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="given-name"
-                  name="firstName"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
-                />
-              </Grid>
               <Grid item xs={12}>
                 <TextField
+                  autoComplete="given-name"
+                  name="name"
                   required
                   fullWidth
-                  label="Phone Number"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={phoneText}
-                  onChange={handlePhoneTextChange}
+                  id="name"
+                  label="Device Name"
+                  disabled={!isFormFieldsEnabled}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  id="latitude"
+                  label="Latitude"
+                  value={latitudeValue}
+                  onChange={handleLatitudeChange}
+                  name="latitude"
+                  disabled={!isFormFieldsEnabled}
                   InputProps={{
                     inputComponent: latitudeMaskCustom,
                   }}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   required
                   fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
+                  label="Longitude"
+                  id="longitude"
+                  name="longitude"
+                  value={longitudeValue}
+                  onChange={handleLongitudeChange}
+                  disabled={!isFormFieldsEnabled}
+                  InputProps={{
+                    inputComponent: longitudeMaskCustom,
+                  }}
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  required
                   fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
+                  id="_id"
+                  label="Device Identifier"
+                  name="_id"
+                  value={deviceId}
+                  disabled
                 />
               </Grid>
+              { isFormFieldsEnabled && (
+              <Grid item xs={12}>
+                <FormLabel style={{color: 'red', fontSize: '14px'}} >* The Device Identifier field will be filled in after clicking on the add device button</FormLabel>
+              </Grid>
+              )}
             </Grid>
             <Button
               type="submit"
@@ -192,7 +213,7 @@ export default function CreateDevice() {
               disabled={!isSubmitEnabled}
               sx={{ mt: 3, mb: 2 }}
             >
-              Add user
+              Add device
             </Button>
           </Box>
         </Box>
