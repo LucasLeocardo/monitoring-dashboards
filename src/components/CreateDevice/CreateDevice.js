@@ -27,7 +27,7 @@ const latitudeMaskCustom = React.forwardRef(function TextMaskCustom(props, ref) 
       <IMaskInput
         {...other}
         mask={Number}
-        scale={6}
+        scale={10}
         radix="."
         digits={1}
         min={-90}
@@ -50,7 +50,7 @@ const longitudeMaskCustom = React.forwardRef(function TextMaskCustom(props, ref)
     <IMaskInput
       {...other}
       mask={Number}
-      scale={6}
+      scale={10}
       radix="."
       min={-180}
       max={180}

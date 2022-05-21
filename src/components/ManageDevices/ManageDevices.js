@@ -361,7 +361,7 @@ function ManageDevices() {
 
     return (
         <div className='table-box'>
-            <Box sx={{ width: '100%' }}>
+            <Box sx={{ width: '1200px' }}>
                 <Paper sx={{ width: '100%', mb: 2 }}>
                   <EnhancedTableToolbar numSelected={selectedDevices.length} setIsDeleteModalOpen={setIsDeleteModalOpen} />
                   <TableContainer sx={{ maxHeight: 500, minHeight: 350 }}>

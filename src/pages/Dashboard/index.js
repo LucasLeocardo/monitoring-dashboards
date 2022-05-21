@@ -222,7 +222,10 @@ function DashboardContent({ content }) {
           }}
         >
           <Toolbar />
-          <Container maxWidth="lg" sx={{ pt: 4, pb: 4, height: 'calc(100% - 64px)' }}>
+          <Container 
+            maxWidth={false}
+            className={selectedPage !== 'Main Dashboard' ? 'normalContainer' : 'fullContainer'}
+          >
             {content}
           </Container>
         </Box>
