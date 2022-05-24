@@ -7,3 +7,4 @@ export const DELETE_USERS = '/users/deleteByIds';
 export const GET_DEVICES = '/devices';
 export const DELETE_DEVICES = '/removeDevicesByIds';
 export const CREATE_DEVICE = '/devices';
+export const GET_ACTIVE_DEVICES = '/activeDevices';
