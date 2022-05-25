@@ -1,12 +1,17 @@
 import { AuthContext } from '../../contexts/auth';
 import * as React from 'react';
 import './mainDashboard.css'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
-import 'leaflet/dist/leaflet.css'
+import { MapContainer, TileLayer, Marker, Popup, Tooltip } from 'react-leaflet'
 import L from 'leaflet';
 import Loading from '../Loading/Loading';
 import * as Endpoints from '../../entities/endPoints';
 import * as ResponseStatus from '../../entities/responseStatus';
+import ConfirmationModal from '../ConfirmationModal/ConfirmationModal'
+
+const modalTitle = 'IoT data visualization';
+const modalTextContent = 'You are about to view real-time data from the device: ';
+
+const defaultMapCenter = [-22.90667664594464, -43.1807230722308];
 
 const makerIcon = new L.icon({
     iconUrl: require('../../assets/iot-signal.png'),
@@ -18,6 +23,9 @@ const makerIcon = new L.icon({
 function MainDashboard() {
 
     const [isDataAvailable, setIsDataAvailable] = React.useState(false);
+    const [selectedDevice, setSelectedDevice] = React.useState(null);
+    const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [modalContentMessage, setModalContentMessage] = React.useState('');
     const [isBrowserLocationEnabled, setIsBrowserLocationEnabled] = React.useState(null);
     const [mapData, setMapData] = React.useState([]);
     const [userLocation, setUserLocation] = React.useState(null);
@@ -33,9 +41,9 @@ function MainDashboard() {
     const getUsersLocation = () => {
         navigator.geolocation.getCurrentPosition(
             function(position) {
-                setIsBrowserLocationEnabled(true);
                 const coords = position.coords;
                 setUserLocation([coords.latitude, coords.longitude]);
+                setIsBrowserLocationEnabled(true);
             },
             function(error) {
                 setIsBrowserLocationEnabled(false);
@@ -54,7 +62,21 @@ function MainDashboard() {
             .catch(error => ( error ));
     }
 
-    if (!isDataAvailable || setIsBrowserLocationEnabled === null) {
+    const onDeviceMapClick = device => {
+        setModalContentMessage(modalTextContent + device.name);
+        setSelectedDevice(device);
+        setIsModalOpen(true);
+    }
+
+    const handleModalCancelClick = () => {
+        setIsModalOpen(false);
+    }
+
+    const handleModalConfirmClick = () => {
+        alert('Hey!');
+    }
+
+    if (!isDataAvailable || isBrowserLocationEnabled === null) {
         return (
             <Loading/>
         );
@@ -63,21 +85,37 @@ function MainDashboard() {
 
     return (
         <div className='dashboardContainer'>
-            <MapContainer center={userLocation} zoom={10} scrollWheelZoom={false} style={{height: '100%', width: '100%'}}>
+            <MapContainer center={isBrowserLocationEnabled ? userLocation : defaultMapCenter} zoom={11} scrollWheelZoom={true} style={{height: '100%', width: '100%'}}>
                 <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                <Marker position={userLocation}>
-                </Marker>
+                {userLocation !==null && 
+                    <Marker position={userLocation}>
+                         <Tooltip sticky>This is your current location!</Tooltip>
+                    </Marker>
+                }
                 {mapData.map(data => {
-                    return(<Marker 
-                    position={[data.latitude, data.longitude]}
-                    icon={makerIcon}
-                    key={data._id}
-                    />)
+                    return(
+                        <Marker 
+                            position={[data.latitude, data.longitude]}
+                            icon={makerIcon}
+                            key={data._id}
+                            eventHandlers={{ click: () => onDeviceMapClick(data) }}
+                        > 
+                            <Tooltip sticky>Device name: {data.name}</Tooltip>
+                        </Marker>
+                    )
                 })}
             </MapContainer>
+            <ConfirmationModal
+                    modalTitle={modalTitle}
+                    modalTextContent={modalContentMessage}
+                    isOpen={isModalOpen}
+                    handleConfirmClick={handleModalConfirmClick}
+                    handleCancelClick={handleModalCancelClick}
+                    isWarningModal={false}
+            />
         </div>
     );
 
