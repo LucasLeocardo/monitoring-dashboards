@@ -6,10 +6,8 @@ import L from 'leaflet';
 import Loading from '../Loading/Loading';
 import * as Endpoints from '../../entities/endPoints';
 import * as ResponseStatus from '../../entities/responseStatus';
-import ConfirmationModal from '../ConfirmationModal/ConfirmationModal'
+import OptionsConfirmationModal from '../ConfirmationModal/OptionsConfirmationModal'
 
-const modalTitle = 'IoT data visualization';
-const modalTextContent = 'You are about to view real-time data from the device: ';
 
 const defaultMapCenter = [-22.90667664594464, -43.1807230722308];
 
@@ -25,7 +23,6 @@ function MainDashboard() {
     const [isDataAvailable, setIsDataAvailable] = React.useState(false);
     const [selectedDevice, setSelectedDevice] = React.useState(null);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
-    const [modalContentMessage, setModalContentMessage] = React.useState('');
     const [isBrowserLocationEnabled, setIsBrowserLocationEnabled] = React.useState(null);
     const [mapData, setMapData] = React.useState([]);
     const [userLocation, setUserLocation] = React.useState(null);
@@ -63,7 +60,6 @@ function MainDashboard() {
     }
 
     const onDeviceMapClick = device => {
-        setModalContentMessage(modalTextContent + device.name);
         setSelectedDevice(device);
         setIsModalOpen(true);
     }
@@ -73,6 +69,8 @@ function MainDashboard() {
     }
 
     const handleModalConfirmClick = () => {
+        setIsModalOpen(false);
+        setSelectedDevice(null);
         alert('Hey!');
     }
 
@@ -108,13 +106,10 @@ function MainDashboard() {
                     )
                 })}
             </MapContainer>
-            <ConfirmationModal
-                    modalTitle={modalTitle}
-                    modalTextContent={modalContentMessage}
+            <OptionsConfirmationModal
+                    selectedDevice={selectedDevice}
                     isOpen={isModalOpen}
-                    handleConfirmClick={handleModalConfirmClick}
-                    handleCancelClick={handleModalCancelClick}
-                    isWarningModal={false}
+                    handleCancelCallback={handleModalCancelClick}
             />
         </div>
     );

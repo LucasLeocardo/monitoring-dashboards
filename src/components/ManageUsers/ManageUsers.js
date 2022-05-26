@@ -88,7 +88,6 @@ function ManageUsers() {
                     isOpen={isDeleteModalOpen}
                     handleConfirmClick={handleModalConfirmClick}
                     handleCancelClick={handleModalCancelClick}
-                    isWarningModal={true}
                 />
             </div>
         );

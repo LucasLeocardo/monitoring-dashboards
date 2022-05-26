@@ -7,10 +7,9 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import PropTypes from 'prop-types';
 import WarningIcon from '@mui/icons-material/Warning';
-import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 
 export default function ConfirmationModal(props) {
-  const {modalTitle, modalTextContent, isOpen, handleConfirmClick, handleCancelClick, isWarningModal} = props;
+  const {modalTitle, modalTextContent, isOpen, handleConfirmClick, handleCancelClick} = props;
 
   return (
     <Dialog
@@ -20,7 +19,7 @@ export default function ConfirmationModal(props) {
     aria-describedby="alert-dialog-description"
     >
     <DialogTitle sx={{display: 'flex'}} id="alert-dialog-title">
-        {isWarningModal ? <WarningIcon sx={{mr: '10px', color: 'red'}}/> : <SettingsInputAntennaIcon sx={{mr: '10px', color: 'green'}}/>}
+        <WarningIcon sx={{mr: '10px', color: 'red'}}/>
         {modalTitle}
     </DialogTitle>
     <DialogContent>
@@ -39,6 +38,5 @@ ConfirmationModal.prototypes = {
     modalTextContent: PropTypes.string.isRequired,
     isOpen: PropTypes.bool.isRequired,
     handleConfirmClick: PropTypes.func.isRequired,
-    handleCancelClick: PropTypes.func.isRequired,
-    isWarningModal: PropTypes.bool.isRequired
+    handleCancelClick: PropTypes.func.isRequired
 }
