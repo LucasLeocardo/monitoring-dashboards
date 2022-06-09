@@ -68,12 +68,6 @@ function MainDashboard() {
         setIsModalOpen(false);
     }
 
-    const handleModalConfirmClick = () => {
-        setIsModalOpen(false);
-        setSelectedDevice(null);
-        alert('Hey!');
-    }
-
     if (!isDataAvailable || isBrowserLocationEnabled === null) {
         return (
             <Loading/>
