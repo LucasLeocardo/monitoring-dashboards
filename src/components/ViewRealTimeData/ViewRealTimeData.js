@@ -27,8 +27,8 @@ import { SiSpeedtest } from "react-icons/si";
 import NumberIndex from '../Number-index/number-index'
 import { UNIT_CAPTION, INDEX_POSITION } from '../../entities/constants'
 import Thermometer from 'react-thermometer-component'
-import GaugeChart from "react-gauge-chart";
 import ReactSpeedometer from "react-d3-speedometer";
+const { Index } = require("../../components/Number-index/number-index.styles");
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -53,24 +53,34 @@ export default function ViewRealTimeData() {
     const [deviceList, setDeviceList] =  React.useState([]);
     const { API, setSelectedPage, user, setUser } = React.useContext(AuthContext); 
     const [isSocketConnected, setIsSocketConnected] = React.useState(false);
-    const [acelX, setAcelX] = React.useState(10.89);
+    const [acelX, setAcelX] = React.useState(0);
     const [acelY, setAcelY] = React.useState(0);
     const [acelZ, setAcelZ] = React.useState(0);
-    const [alphaX, setAlphaX] = React.useState(35.89);
+    const [alphaX, setAlphaX] = React.useState(0);
     const [alphaY, setAlphaY] = React.useState(0);
     const [alphaZ, setAlphaZ] = React.useState(0);
-    const [temperature, setTemperature] = React.useState(60);
-    const [humidity, setHumidity] = React.useState(80);
+    const [temperature, setTemperature] = React.useState(0);
+    const [humidity, setHumidity] = React.useState(0);
     const mounted = React.useRef();
 
     React.useEffect(() => {
-        //const socket = configureSocketConnection(deviceId);
+        const socket = configureSocketConnection(deviceId);
         if (!mounted.current) { 
             getActiveDevicesAsync();
             setSelectedPage('');
             mounted.current = true;
         } 
-        //return () => { socket.disconnect();};
+        return () => { 
+            socket.disconnect();
+            setAcelX(0);
+            setAcelY(0);
+            setAcelZ(0);
+            setAlphaX(0);
+            setAlphaY(0);
+            setAlphaZ(0);
+            setTemperature(0);
+            setHumidity(0);
+        };
     }, [deviceId]);
 
     const getActiveDevicesAsync = async () => {
@@ -189,6 +199,14 @@ export default function ViewRealTimeData() {
                             </InfoCardContent>
                             <InfoCardFooter>
                                 <SiSpeedtest color="#c6c6c6" size={35} />
+                                <Index
+                                    style={{
+                                    fontSize: 24,
+                                    justifyContent: "center"
+                                    }}
+                                >
+                                    {UNIT_CAPTION["ACCELETATION"]}
+                                </Index>
                             </InfoCardFooter>
                         </Item>
                     </Grid>
@@ -212,6 +230,14 @@ export default function ViewRealTimeData() {
                             </InfoCardContent>
                             <InfoCardFooter>
                                 <SiSpeedtest color="#c6c6c6" size={35} />
+                                <Index
+                                    style={{
+                                    fontSize: 24,
+                                    justifyContent: "center"
+                                    }}
+                                >
+                                    {UNIT_CAPTION["ACCELETATION"]}
+                                </Index>
                             </InfoCardFooter>
                         </Item>
                     </Grid>
@@ -235,69 +261,107 @@ export default function ViewRealTimeData() {
                             </InfoCardContent>
                             <InfoCardFooter>
                                 <SiSpeedtest color="#c6c6c6" size={35} />
+                                <Index
+                                    style={{
+                                    fontSize: 24,
+                                    justifyContent: "center"
+                                    }}
+                                >
+                                    {UNIT_CAPTION["ACCELETATION"]}
+                                </Index>
                             </InfoCardFooter>
                         </Item>
                     </Grid>
                     <Grid item xs={4}>
                         <Item>
                             <InfoCardTitle>Angular acceleration X</InfoCardTitle>
-                            <InfoCardContent>
-                                <GaugeChart
-                                    id="AcelX"
-                                    nrOfLevels={3}
-                                    arcsLength={[0.25, 0.5, 0.25]}
-                                    colors={["#2d74da", "#1f57a4", "#25467a"]}
-                                    arcPadding={0.02}
-                                    percent={alphaX/100}
-                                    textColor={"#000000"}
-                                    needleColor={"#5392ff"}
-                                    formatTextValue={(alphaX) => alphaX}
+                            <InfoCardContent marginTop="30px">
+                            <ReactSpeedometer
+                                    maxValue={120}
+                                    minValue={-100}
+                                    height={190}
+                                    width={290}
+                                    value={alphaX}
+                                    needleTransition="easeQuadIn"
+                                    needleTransitionDuration={1000}
+                                    needleColor="gray"
+                                    startColor="red"
+                                    segments={10}
+                                    endColor="yellow"
                                 />
                             </InfoCardContent>
                             <InfoCardFooter>
                                 <SiSpeedtest color="#c6c6c6" size={35} />
+                                <Index
+                                    style={{
+                                    fontSize: 24,
+                                    justifyContent: "center"
+                                    }}
+                                >
+                                    {UNIT_CAPTION["ANGULAR ACCELETATION"]}
+                                </Index>
                             </InfoCardFooter>
                         </Item>
                     </Grid>
                     <Grid item xs={4}>
                         <Item>
                             <InfoCardTitle>Angular acceleration Y</InfoCardTitle>
-                            <InfoCardContent>
-                                <GaugeChart
-                                    id="AcelX"
-                                    nrOfLevels={3}
-                                    arcsLength={[0.25, 0.5, 0.25]}
-                                    colors={["#2d74da", "#1f57a4", "#25467a"]}
-                                    arcPadding={0.02}
-                                    percent={alphaY/100}
-                                    textColor={"#000000"}
-                                    needleColor={"#5392ff"}
-                                    formatTextValue={(alphaY) => alphaY}
+                            <InfoCardContent marginTop="30px">
+                                <ReactSpeedometer
+                                    maxValue={120}
+                                    minValue={-100}
+                                    height={190}
+                                    width={290}
+                                    value={alphaY}
+                                    needleTransition="easeQuadIn"
+                                    needleTransitionDuration={1000}
+                                    needleColor="gray"
+                                    startColor="red"
+                                    segments={10}
+                                    endColor="yellow"
                                 />
                             </InfoCardContent>
                             <InfoCardFooter>
                                 <SiSpeedtest color="#c6c6c6" size={35} />
+                                <Index
+                                    style={{
+                                    fontSize: 24,
+                                    justifyContent: "center"
+                                    }}
+                                >
+                                    {UNIT_CAPTION["ANGULAR ACCELETATION"]}
+                                </Index>
                             </InfoCardFooter>
                         </Item>
                     </Grid>
                     <Grid item xs={4}>
                         <Item>
                             <InfoCardTitle>Angular acceleration Z</InfoCardTitle>
-                            <InfoCardContent>
-                                <GaugeChart
-                                    id="AcelX"
-                                    nrOfLevels={3}
-                                    arcsLength={[0.25, 0.5, 0.25]}
-                                    colors={["#2d74da", "#1f57a4", "#25467a"]}
-                                    arcPadding={0.02}
-                                    percent={alphaZ/100}
-                                    textColor={"#000000"}
-                                    needleColor={"#5392ff"}
-                                    formatTextValue={(alphaZ) => alphaZ}
+                            <InfoCardContent marginTop="30px">
+                                <ReactSpeedometer
+                                    maxValue={120}
+                                    minValue={-100}
+                                    height={190}
+                                    width={290}
+                                    value={alphaZ}
+                                    needleTransition="easeQuadIn"
+                                    needleTransitionDuration={1000}
+                                    needleColor="gray"
+                                    startColor="red"
+                                    segments={10}
+                                    endColor="yellow"
                                 />
                             </InfoCardContent>
                             <InfoCardFooter>
                                 <SiSpeedtest color="#c6c6c6" size={35} />
+                                <Index
+                                    style={{
+                                    fontSize: 24,
+                                    justifyContent: "center"
+                                    }}
+                                >
+                                    {UNIT_CAPTION["ANGULAR ACCELETATION"]}
+                                </Index>
                             </InfoCardFooter>
                         </Item>
                     </Grid>
