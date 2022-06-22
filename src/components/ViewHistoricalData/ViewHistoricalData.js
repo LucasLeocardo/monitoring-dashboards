@@ -16,6 +16,20 @@ import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
+import { Line } from 'react-chartjs-2';
+import {
+    NewInfoCardContent,
+    InfoCardTitle
+  } from "../Info-elements/info-elements";
+import 'chartjs-adapter-date-fns';
+import {
+    Chart as ChartJS,
+    registerables
+  } from "chart.js";
+
+ChartJS.register(
+...registerables
+);
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -27,9 +41,11 @@ const Item = styled(Paper)(({ theme }) => ({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    height: '500px',
+    height: '600px',
     color: theme.palette.text.secondary,
   }));
+
+const data = [{x: '2022-06-10', acelX: 11, acelY: 9.89, acelZ: 10.25}, {x: '2022-06-13', acelX: 11, acelY: 9.89, acelZ: 10.25}, {x: '2022-06-18', acelX: 8.89, acelY: 7.89, acelZ: 15.25}];
 
 export default function ViewHistoricalData() {
 
@@ -128,7 +144,58 @@ export default function ViewHistoricalData() {
                 <Grid container spacing={4}>
                 <Grid item xs={12}>
                         <Item>
-                            HAHAHAAH
+                            <InfoCardTitle>Linear acceleration (x, y, z)</InfoCardTitle>
+                            <NewInfoCardContent marginTop="30px">
+                                <Line
+                                    data={{
+                                        datasets: [{
+                                            label: 'Acceleration X',
+                                            data: data,
+                                            parsing: {
+                                                yAxisKey: 'acelX'
+                                            },
+                                            backgroundColor: 'red',
+                                            borderColor: 'red'
+                                        }, {
+                                            label: 'Acceleration Y',
+                                            data: data,
+                                            parsing: {
+                                                yAxisKey: 'acelY'
+                                            },
+                                            backgroundColor: 'blue',
+                                            borderColor: 'blue'
+                                        }, {
+                                            label: 'Acceleration Z',
+                                            data: data,
+                                            parsing: {
+                                                yAxisKey: 'acelZ'
+                                            },
+                                            backgroundColor: 'green',
+                                            borderColor: 'green'
+                                        }]
+                                    }}
+                                    options={{
+                                        maintainAspectRatio: false,
+                                        scales: {
+                                            x: {
+                                                type: 'time',
+                                                time: {
+                                                    unit: 'day'
+                                                }
+                                            },
+                                            y: {
+                                                ticks: {
+                                                    callback: function(value, index, ticks) {
+                                                        return value + ' m/s²';
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    height="100%"
+                                    width="100%"
+                                />
+                            </NewInfoCardContent>
                         </Item>
                     </Grid>
                 </Grid>

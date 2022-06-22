@@ -33,6 +33,16 @@ export const InfoCardContent = styled.div`
   width: 50%;
   margin-top: ${(props) => props.marginTop ? props.marginTop : "0px"};
 `;
+
+export const NewInfoCardContent = styled.div`
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 90%;
+  width: 100%;
+  margin-top: ${(props) => props.marginTop ? props.marginTop : "0px"};
+`;
+
 export const InfoCardFooter = styled.div`
   display: flex;
   align-items: center;
