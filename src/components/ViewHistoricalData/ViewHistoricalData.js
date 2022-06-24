@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import Autocomplete from '@mui/material/Autocomplete';
 import * as EndPoints from '../../entities/endPoints'
 import Loading from '../Loading/Loading';
+import CardLoading from '../CardLoading/CardLoading';
 import TextField from '@mui/material/TextField';
 import { useParams } from "react-router-dom";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -45,15 +46,19 @@ const Item = styled(Paper)(({ theme }) => ({
     color: theme.palette.text.secondary,
   }));
 
-const data = [{x: '2022-06-10', acelX: 11, acelY: 9.89, acelZ: 10.25}, {x: '2022-06-13', acelX: 11, acelY: 9.89, acelZ: 10.25}, {x: '2022-06-18', acelX: 8.89, acelY: 7.89, acelZ: 15.25}];
-
 export default function ViewHistoricalData() {
 
     const { deviceId } = useParams();
     const { API, setSelectedPage, user } = React.useContext(AuthContext); 
     const navigate = useNavigate();
-    const [isDataAvailable, setIsDataAvailable] = React.useState(false);
+    const [isDeviceListAvailable, setIsDeviceListAvailable] = React.useState(false);
     const [deviceList, setDeviceList] =  React.useState([]);
+    const [vibrationDataList, setVibrationDataList] =  React.useState([]);
+    const [isVibrationDataAvailable, setIsVibrationDataAvailable] = React.useState(false);
+    const [temperatureDataList, setTemperatureDataList] =  React.useState([]);
+    const [isTemperatureDataAvailable, setIsTemperatureDataAvailable] = React.useState(false);
+    const [humidityDataList, setHumidityDataList] =  React.useState([]);
+    const [isHumidityDataAvailable, setIsHumidityDataAvailable] = React.useState(false);
     const mounted = React.useRef();
     const [startDate, setStartDate] = React.useState(new Date());
     const [endDate, setEndDate] = React.useState(new Date());
@@ -65,18 +70,65 @@ export default function ViewHistoricalData() {
             setSelectedPage('');
             mounted.current = true;
         } 
-    }, []);
+        getDaillyMeasurements();
+    }, [deviceId, startDate, endDate]);
 
     const getActiveDevicesAsync = async () => {
         await API(EndPoints.BASE_ENDPOINT, user.token).get(EndPoints.GET_ACTIVE_DEVICES)
             .then( response => {
                 if (response.status === ResponseStatus.SUCCESS) {
                     setDeviceList(response.data);
-                    setIsDataAvailable(true);
+                    setIsDeviceListAvailable(true);
                 }
             })
             .catch(error => ( error ));
     }
+
+    const getDaillyMeasurements = () => {
+        const requestStartDate = startDate.toDateString();
+        const requestEndDate = endDate.toDateString();
+        const requestBody = {deviceId, startDate: requestStartDate, endDate: requestEndDate};
+        getDaillyVibrationDataAsync(requestBody);
+        getDaillyTemperatureDataAsync(requestBody);
+        getDaillyHumidityDataAsync(requestBody);
+    }
+
+    const getDaillyVibrationDataAsync = async (requestBody) => {
+        setIsVibrationDataAvailable(false);
+        await API(EndPoints.BASE_ENDPOINT, user.token).post(EndPoints.GET_DAILLY_VIBRATION_DATA, requestBody)
+            .then( response => {
+                if (response.status === ResponseStatus.SUCCESS) {
+                    setVibrationDataList(response.data);
+                    setIsVibrationDataAvailable(true);
+                }
+            })
+            .catch(error => ( error ));
+    }
+
+    const getDaillyTemperatureDataAsync = async (requestBody) => {
+        setIsTemperatureDataAvailable(false);
+        await API(EndPoints.BASE_ENDPOINT, user.token).post(EndPoints.GET_DAILLY_TEMPERATURE_DATA, requestBody)
+            .then( response => {
+                if (response.status === ResponseStatus.SUCCESS) {
+                    setTemperatureDataList(response.data);
+                    setIsTemperatureDataAvailable(true);
+                }
+            })
+            .catch(error => ( error ));
+    }
+
+    const getDaillyHumidityDataAsync = async (requestBody) => {
+        setIsHumidityDataAvailable(false);
+        await API(EndPoints.BASE_ENDPOINT, user.token).post(EndPoints.GET_DAILLY_HUMIDITY_DATA, requestBody)
+            .then( response => {
+                if (response.status === ResponseStatus.SUCCESS) {
+                    setHumidityDataList(response.data);
+                    setIsHumidityDataAvailable(true);
+                }
+            })
+            .catch(error => ( error ));
+    }
+
 
     const onSelectedDeviceChange = (event, values) => {
         if (values) {
@@ -84,12 +136,20 @@ export default function ViewHistoricalData() {
         }
     }
 
+    const onStarDateChange = (newDate) => {
+        setStartDate(newDate);
+    }
+
+    const onEndDateChange = (newDate) => {
+        setEndDate(newDate);
+    }
+
     const getDefaultValue = () => {
         const defaultDevice = deviceList.find(device => device._id === deviceId);
         return defaultDevice
     }
 
-    if (!isDataAvailable) {
+    if (!isDeviceListAvailable) {
         return (
             <Loading/>
         );
@@ -124,7 +184,7 @@ export default function ViewHistoricalData() {
                             value={startDate}
                             minDate={new Date('2022-01-01')}
                             onChange={(newValue) => {
-                                setStartDate(newValue);
+                                onStarDateChange(newValue);
                             }}
                             renderInput={(params) => <TextField {...params} />}
                         />
@@ -133,7 +193,7 @@ export default function ViewHistoricalData() {
                             value={endDate}
                             minDate={new Date('2022-01-01')}
                             onChange={(newValue) => {
-                                setEndDate(newValue);
+                                onEndDateChange(newValue);
                             }}
                             renderInput={(params) => <TextField {...params} />}
                         />
@@ -142,33 +202,37 @@ export default function ViewHistoricalData() {
             </Stack>
             <Box sx={{ flexGrow: 1, marginTop: '40px', paddingBottom: '40px' }}>
                 <Grid container spacing={4}>
-                <Grid item xs={12}>
+                    <Grid item xs={12}>
                         <Item>
                             <InfoCardTitle>Linear acceleration (x, y, z)</InfoCardTitle>
+                            {!isVibrationDataAvailable? <CardLoading/> : (
                             <NewInfoCardContent marginTop="30px">
                                 <Line
                                     data={{
                                         datasets: [{
                                             label: 'Acceleration X',
-                                            data: data,
+                                            data: vibrationDataList,
                                             parsing: {
-                                                yAxisKey: 'acelX'
+                                                yAxisKey: 'acelX',
+                                                xAxisKey: '_id'
                                             },
                                             backgroundColor: 'red',
                                             borderColor: 'red'
                                         }, {
                                             label: 'Acceleration Y',
-                                            data: data,
+                                            data: vibrationDataList,
                                             parsing: {
-                                                yAxisKey: 'acelY'
+                                                yAxisKey: 'acelY',
+                                                xAxisKey: '_id'
                                             },
                                             backgroundColor: 'blue',
                                             borderColor: 'blue'
                                         }, {
                                             label: 'Acceleration Z',
-                                            data: data,
+                                            data: vibrationDataList,
                                             parsing: {
-                                                yAxisKey: 'acelZ'
+                                                yAxisKey: 'acelZ',
+                                                xAxisKey: '_id'
                                             },
                                             backgroundColor: 'green',
                                             borderColor: 'green'
@@ -195,7 +259,151 @@ export default function ViewHistoricalData() {
                                     height="100%"
                                     width="100%"
                                 />
-                            </NewInfoCardContent>
+                            </NewInfoCardContent>)}
+                        </Item>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Item>
+                            <InfoCardTitle>Angular acceleration (x, y, z)</InfoCardTitle>
+                            {!isVibrationDataAvailable? <CardLoading/> : (
+                            <NewInfoCardContent marginTop="30px">
+                                <Line
+                                    data={{
+                                        datasets: [{
+                                            label: 'Angular acceleration X',
+                                            data: vibrationDataList,
+                                            parsing: {
+                                                yAxisKey: 'alphaX',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'red',
+                                            borderColor: 'red'
+                                        }, {
+                                            label: 'Angular acceleration Y',
+                                            data: vibrationDataList,
+                                            parsing: {
+                                                yAxisKey: 'alphaY',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'blue',
+                                            borderColor: 'blue'
+                                        }, {
+                                            label: 'Angular acceleration Z',
+                                            data: vibrationDataList,
+                                            parsing: {
+                                                yAxisKey: 'alphaZ',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'green',
+                                            borderColor: 'green'
+                                        }]
+                                    }}
+                                    options={{
+                                        maintainAspectRatio: false,
+                                        scales: {
+                                            x: {
+                                                type: 'time',
+                                                time: {
+                                                    unit: 'day'
+                                                }
+                                            },
+                                            y: {
+                                                ticks: {
+                                                    callback: function(value, index, ticks) {
+                                                        return value + 'rad/s²';
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    height="100%"
+                                    width="100%"
+                                />
+                            </NewInfoCardContent>)}
+                        </Item>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Item>
+                            <InfoCardTitle>Humidity</InfoCardTitle>
+                            {!isHumidityDataAvailable? <CardLoading/> : (
+                            <NewInfoCardContent marginTop="30px">
+                                <Line
+                                    data={{
+                                        datasets: [{
+                                            label: 'Soil humidity',
+                                            data: humidityDataList,
+                                            parsing: {
+                                                yAxisKey: 'humidity',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'blue',
+                                            borderColor: 'blue'
+                                        }]
+                                    }}
+                                    options={{
+                                        maintainAspectRatio: false,
+                                        scales: {
+                                            x: {
+                                                type: 'time',
+                                                time: {
+                                                    unit: 'day'
+                                                }
+                                            },
+                                            y: {
+                                                ticks: {
+                                                    callback: function(value, index, ticks) {
+                                                        return value + ' %';
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    height="100%"
+                                    width="100%"
+                                />
+                            </NewInfoCardContent>)}
+                        </Item>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Item>
+                            <InfoCardTitle>Temperature</InfoCardTitle>
+                            {!isTemperatureDataAvailable? <CardLoading/> : (
+                            <NewInfoCardContent marginTop="30px">
+                                <Line
+                                    data={{
+                                        datasets: [{
+                                            label: 'Soil temperature',
+                                            data: temperatureDataList,
+                                            parsing: {
+                                                yAxisKey: 'temperature',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'red',
+                                            borderColor: 'red'
+                                        }]
+                                    }}
+                                    options={{
+                                        maintainAspectRatio: false,
+                                        scales: {
+                                            x: {
+                                                type: 'time',
+                                                time: {
+                                                    unit: 'day'
+                                                }
+                                            },
+                                            y: {
+                                                ticks: {
+                                                    callback: function(value, index, ticks) {
+                                                        return value + ' °C';
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    height="100%"
+                                    width="100%"
+                                />
+                            </NewInfoCardContent>)}
                         </Item>
                     </Grid>
                 </Grid>

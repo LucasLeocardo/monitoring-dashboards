@@ -8,3 +8,6 @@ export const GET_DEVICES = '/devices';
 export const DELETE_DEVICES = '/removeDevicesByIds';
 export const CREATE_DEVICE = '/devices';
 export const GET_ACTIVE_DEVICES = '/activeDevices';
+export const GET_DAILLY_VIBRATION_DATA = '/vibrations/getDaillyMeasurementsByDeviceId';
+export const GET_DAILLY_TEMPERATURE_DATA = '/temperature/getDaillyMeasurementsByDeviceId';
+export const GET_DAILLY_HUMIDITY_DATA = '/humidity/getDaillyMeasurementsByDeviceId';

@@ -179,7 +179,7 @@ export default function ViewRealTimeData() {
             </Stack>
             <Box sx={{ flexGrow: 1, marginTop: '40px', paddingBottom: '40px' }}>
                 <Grid container spacing={4}>
-                <Grid item xs={4}>
+                    <Grid item xs={4}>
                         <Item>
                             <InfoCardTitle>Acceleration X</InfoCardTitle>
                             <InfoCardContent marginTop="30px">
