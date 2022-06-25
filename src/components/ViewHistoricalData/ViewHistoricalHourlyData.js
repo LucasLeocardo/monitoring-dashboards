@@ -85,8 +85,8 @@ export default function ViewHistoricalHourlyData() {
     }
 
     const getHourlyMeasurements = () => {
-        const requestStartDate = startDate.toUTCString();
-        const requestEndDate = endDate.toUTCString();
+        const requestStartDate = startDate.toISOString();
+        const requestEndDate = endDate.toISOString();
         const requestBody = {deviceId, startDate: requestStartDate, endDate: requestEndDate};
         getHourlyVibrationDataAsync(requestBody);
         getHourlyTemperatureDataAsync(requestBody);
