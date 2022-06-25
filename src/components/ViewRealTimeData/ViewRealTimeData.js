@@ -184,8 +184,8 @@ export default function ViewRealTimeData() {
                             <InfoCardTitle>Acceleration X</InfoCardTitle>
                             <InfoCardContent marginTop="30px">
                                 <ReactSpeedometer
-                                    maxValue={120}
-                                    minValue={-100}
+                                    maxValue={20}
+                                    minValue={-20}
                                     height={190}
                                     width={290}
                                     value={acelX}
@@ -215,8 +215,8 @@ export default function ViewRealTimeData() {
                             <InfoCardTitle>Acceleration Y</InfoCardTitle>
                             <InfoCardContent marginTop="30px">
                                 <ReactSpeedometer
-                                    maxValue={120}
-                                    minValue={-100}
+                                    maxValue={20}
+                                    minValue={-20}
                                     height={190}
                                     width={290}
                                     value={acelY}
@@ -246,8 +246,8 @@ export default function ViewRealTimeData() {
                             <InfoCardTitle>Acceleration Z</InfoCardTitle>
                             <InfoCardContent marginTop="30px">
                                 <ReactSpeedometer
-                                    maxValue={120}
-                                    minValue={-100}
+                                    maxValue={20}
+                                    minValue={-20}
                                     height={190}
                                     width={290}
                                     value={acelZ}
@@ -277,8 +277,8 @@ export default function ViewRealTimeData() {
                             <InfoCardTitle>Angular acceleration X</InfoCardTitle>
                             <InfoCardContent marginTop="30px">
                             <ReactSpeedometer
-                                    maxValue={120}
-                                    minValue={-100}
+                                    maxValue={10}
+                                    minValue={-10}
                                     height={190}
                                     width={290}
                                     value={alphaX}
@@ -308,8 +308,8 @@ export default function ViewRealTimeData() {
                             <InfoCardTitle>Angular acceleration Y</InfoCardTitle>
                             <InfoCardContent marginTop="30px">
                                 <ReactSpeedometer
-                                    maxValue={120}
-                                    minValue={-100}
+                                    maxValue={10}
+                                    minValue={-10}
                                     height={190}
                                     width={290}
                                     value={alphaY}
@@ -339,8 +339,8 @@ export default function ViewRealTimeData() {
                             <InfoCardTitle>Angular acceleration Z</InfoCardTitle>
                             <InfoCardContent marginTop="30px">
                                 <ReactSpeedometer
-                                    maxValue={120}
-                                    minValue={-100}
+                                    maxValue={10}
+                                    minValue={-10}
                                     height={190}
                                     width={290}
                                     value={alphaZ}

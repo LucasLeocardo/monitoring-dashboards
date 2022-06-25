@@ -38,8 +38,11 @@ export default function OptionsConfirmationModal(props) {
     if (radioValue === 'realTime') {
         navigate(`/view-real-time-data/${selectedDevice._id}`);
     }
-    else if (radioValue === 'historical') {
-        navigate(`/view-historical-data/${selectedDevice._id}`);
+    else if (radioValue === 'historical-daily') {
+        navigate(`/view-historical-daily-data/${selectedDevice._id}`);
+    }
+    else if (radioValue === 'historical-hourly') {
+      navigate(`/view-historical-hourly-data/${selectedDevice._id}`);
     }
   };
 
@@ -65,7 +68,8 @@ export default function OptionsConfirmationModal(props) {
             onChange={handleRadioChange}
         >
             <FormControlLabel value="realTime" control={<Radio color="success" />} label="View real-time data" />
-            <FormControlLabel value="historical" control={<Radio color="success" />} label="View historical data" />
+            <FormControlLabel value="historical-daily" control={<Radio color="success" />} label="View historical data (Daily Basis)" />
+            <FormControlLabel value="historical-hourly" control={<Radio color="success" />} label="View historical data (Hourly Basis)" />
         </RadioGroup>
     </FormControl>
     <DialogActions>

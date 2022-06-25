@@ -46,7 +46,7 @@ const Item = styled(Paper)(({ theme }) => ({
     color: theme.palette.text.secondary,
   }));
 
-export default function ViewHistoricalData() {
+export default function ViewHistoricalDailyData() {
 
     const { deviceId } = useParams();
     const { API, setSelectedPage, user } = React.useContext(AuthContext); 
@@ -85,8 +85,8 @@ export default function ViewHistoricalData() {
     }
 
     const getDaillyMeasurements = () => {
-        const requestStartDate = startDate.toDateString();
-        const requestEndDate = endDate.toDateString();
+        const requestStartDate = startDate.toUTCString();
+        const requestEndDate = endDate.toUTCString();
         const requestBody = {deviceId, startDate: requestStartDate, endDate: requestEndDate};
         getDaillyVibrationDataAsync(requestBody);
         getDaillyTemperatureDataAsync(requestBody);
@@ -330,14 +330,95 @@ export default function ViewHistoricalData() {
                                 <Line
                                     data={{
                                         datasets: [{
-                                            label: 'Soil humidity',
+                                            label: 'H0',
                                             data: humidityDataList,
                                             parsing: {
-                                                yAxisKey: 'humidity',
+                                                yAxisKey: 'h0',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'red',
+                                            borderColor: 'red'
+                                        },{
+                                            label: 'H1',
+                                            data: humidityDataList,
+                                            parsing: {
+                                                yAxisKey: 'h1',
                                                 xAxisKey: '_id'
                                             },
                                             backgroundColor: 'blue',
                                             borderColor: 'blue'
+                                        },{
+                                            label: 'H2',
+                                            data: humidityDataList,
+                                            parsing: {
+                                                yAxisKey: 'h2',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'green',
+                                            borderColor: 'green'
+                                        },{
+                                            label: 'H3',
+                                            data: humidityDataList,
+                                            parsing: {
+                                                yAxisKey: 'h3',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'yellow',
+                                            borderColor: 'yellow'
+                                        },{
+                                            label: 'H4',
+                                            data: humidityDataList,
+                                            parsing: {
+                                                yAxisKey: 'h4',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'gray',
+                                            borderColor: 'gray'
+                                        },{
+                                            label: 'H5',
+                                            data: humidityDataList,
+                                            parsing: {
+                                                yAxisKey: 'h5',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'black',
+                                            borderColor: 'black'
+                                        },{
+                                            label: 'H6',
+                                            data: humidityDataList,
+                                            parsing: {
+                                                yAxisKey: 'h6',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'pink',
+                                            borderColor: 'pink'
+                                        },{
+                                            label: 'H7',
+                                            data: humidityDataList,
+                                            parsing: {
+                                                yAxisKey: 'h7',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'orange',
+                                            borderColor: 'orange'
+                                        },{
+                                            label: 'H8',
+                                            data: humidityDataList,
+                                            parsing: {
+                                                yAxisKey: 'h8',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'brown',
+                                            borderColor: 'brown'
+                                        },{
+                                            label: 'H9',
+                                            data: humidityDataList,
+                                            parsing: {
+                                                yAxisKey: 'h9',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'purple',
+                                            borderColor: 'purple'
                                         }]
                                     }}
                                     options={{
@@ -372,14 +453,95 @@ export default function ViewHistoricalData() {
                                 <Line
                                     data={{
                                         datasets: [{
-                                            label: 'Soil temperature',
+                                            label: 'T0',
                                             data: temperatureDataList,
                                             parsing: {
-                                                yAxisKey: 'temperature',
+                                                yAxisKey: 't0',
                                                 xAxisKey: '_id'
                                             },
                                             backgroundColor: 'red',
                                             borderColor: 'red'
+                                        },{
+                                            label: 'T1',
+                                            data: temperatureDataList,
+                                            parsing: {
+                                                yAxisKey: 't1',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'blue',
+                                            borderColor: 'blue'
+                                        },{
+                                            label: 'T2',
+                                            data: temperatureDataList,
+                                            parsing: {
+                                                yAxisKey: 't2',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'green',
+                                            borderColor: 'green'
+                                        },{
+                                            label: 'T3',
+                                            data: temperatureDataList,
+                                            parsing: {
+                                                yAxisKey: 't3',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'yellow',
+                                            borderColor: 'yellow'
+                                        },{
+                                            label: 'T4',
+                                            data: temperatureDataList,
+                                            parsing: {
+                                                yAxisKey: 't4',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'gray',
+                                            borderColor: 'gray'
+                                        },{
+                                            label: 'T5',
+                                            data: temperatureDataList,
+                                            parsing: {
+                                                yAxisKey: 't5',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'black',
+                                            borderColor: 'black'
+                                        },{
+                                            label: 'T6',
+                                            data: temperatureDataList,
+                                            parsing: {
+                                                yAxisKey: 't6',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'pink',
+                                            borderColor: 'pink'
+                                        },{
+                                            label: 'T7',
+                                            data: temperatureDataList,
+                                            parsing: {
+                                                yAxisKey: 't7',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'orange',
+                                            borderColor: 'orange'
+                                        },{
+                                            label: 'T8',
+                                            data: temperatureDataList,
+                                            parsing: {
+                                                yAxisKey: 't8',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'brown',
+                                            borderColor: 'brown'
+                                        },{
+                                            label: 'T9',
+                                            data: temperatureDataList,
+                                            parsing: {
+                                                yAxisKey: 't9',
+                                                xAxisKey: '_id'
+                                            },
+                                            backgroundColor: 'purple',
+                                            borderColor: 'purple'
                                         }]
                                     }}
                                     options={{
