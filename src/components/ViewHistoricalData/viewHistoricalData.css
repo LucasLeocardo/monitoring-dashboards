@@ -2,3 +2,8 @@
     margin: 0;
     margin-top: 0px !important;
 }
+
+.css-1frb4yz > :not(style) + :not(style) {
+    margin: 0;
+    margin-top: 0px !important;
+}
