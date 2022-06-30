@@ -1,9 +1,9 @@
 .css-1ghbwu7-MuiStack-root>:not(style)+:not(style) {
-    margin: 0;
+    margin: 0 !important;
     margin-top: 0px !important;
 }
 
 .css-1frb4yz > :not(style) + :not(style) {
-    margin: 0;
+    margin: 0 !important;
     margin-top: 0px !important;
 }
