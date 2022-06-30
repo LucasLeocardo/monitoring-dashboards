@@ -6,7 +6,8 @@ const axiosCreator = (setUser) => {
 
     const instance = axios.create({
         headers: {
-            'Accept-Language': 'en-US'
+            'Accept-Language': 'en-US',
+            'Access-Control-Allow-Origin': process.env.REACT_APP_MY_URL
         }
     });
 
