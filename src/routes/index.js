@@ -11,6 +11,7 @@ import CreateDevice from '../components/CreateDevice/CreateDevice';
 import ViewRealTimeData from '../components/ViewRealTimeData/ViewRealTimeData';
 import ViewHistoricalDailyData from '../components/ViewHistoricalData/ViewHistoricalDailyData';
 import ViewHistoricalHourlyData from '../components/ViewHistoricalData/ViewHistoricalHourlyData';
+import EditDevice from '../components/EditDevice/EditDevice';
 
 export default function RoutesCreator(){
 
@@ -25,6 +26,7 @@ export default function RoutesCreator(){
                     <Route exact path="/manage-devices" element={<ManageDevices/>}/>
                     <Route exact path="/manage-users/create-user" element={<CreateUser/>}/>
                     <Route exact path="/manage-devices/create-device" element={<CreateDevice/>}/>
+                    <Route exact path="/manage-devices/edit-device/:deviceId" element={<EditDevice/>}/>
                     <Route exact path="/view-real-time-data/:deviceId" element={<ViewRealTimeData/>}/>
                     <Route exact path="/view-historical-daily-data/:deviceId" element={<ViewHistoricalDailyData/>}/>
                     <Route exact path="/view-historical-hourly-data/:deviceId" element={<ViewHistoricalHourlyData/>}/>

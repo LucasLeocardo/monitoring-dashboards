@@ -29,6 +29,7 @@ import * as ResponseStatus from '../../entities/responseStatus';
 import moment from 'moment';
 import ConfirmationModal from '../ConfirmationModal/ConfirmationModal'
 import * as Endpoints from '../../entities/endPoints';
+import EditIcon from '@mui/icons-material/Edit';
 
 const modalTitle = 'Do you really want to remove these devices?';
 const modalTextContent = 'By clicking confirm, the selected devices will be permanently removed from the system along with their field measured data.';
@@ -99,6 +100,12 @@ function descendingComparator(a, b, orderBy) {
       numeric: false,
       disablePadding: true,
       label: 'Registered in',
+    },
+    {
+        id: 'action',
+        numeric: false,
+        disablePadding: true,
+        label: 'Action',
     }
   ];
   
@@ -237,6 +244,7 @@ function ManageDevices() {
     const [selectedDevices, setSelectedDevices] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         setSelectedPage('Manage devices');
@@ -322,6 +330,10 @@ function ManageDevices() {
       }
 
       setSelectedDevices(newSelected);
+    };
+
+    const onEditDeviceClick = (deviceId) => {
+      navigate(`/manage-devices/edit-device/${deviceId}`);
     };
 
     const handleChangePage = (event, newPage) => {
@@ -422,6 +434,13 @@ function ManageDevices() {
                                     <Switch checked={row.isActive} onClick={() => handleOnDeviceStatusChange(row._id, row.isActive)} inputProps={{ 'aria-label': 'controlled' }}/>
                                 </TableCell>
                                 <TableCell padding="none">{row.created_at}</TableCell>
+                                <TableCell padding="none">
+                                  <Tooltip title="Edit device">
+                                    <IconButton onClick={() => onEditDeviceClick(row._id)}>
+                                      <EditIcon />
+                                    </IconButton>
+                                  </Tooltip>
+                                </TableCell>
                               </TableRow>
                             );
                           })}

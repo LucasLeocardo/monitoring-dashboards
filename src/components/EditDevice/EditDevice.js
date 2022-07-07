@@ -11,7 +11,7 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { IMaskInput } from 'react-imask';
 import PropTypes from 'prop-types';
-import './createDevice.css';
+import './editDevice.css';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/auth';
@@ -26,6 +26,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
+import { useParams } from "react-router-dom";
 
 
 
@@ -87,42 +88,48 @@ const MenuProps = {
   },
 };
 
-export default function CreateDevice() {
+export default function EditDevice() {
   const { API, setSelectedPage, user } = React.useContext(AuthContext); 
-  const [latitudeValue, setLatitudeValue] = React.useState('');
-  const [longitudeValue, setLongitudeValue] = React.useState('');
-  const [deviceId, setDeviceId] = React.useState('');
-  const [isFormFieldsEnabled, setIsFormFieldsEnabled] = React.useState(true);
-  const [isSubmitEnabled, setIsSubmitEnabled] = React.useState(true);
+  const [deviceName, setDeviceName] = React.useState('');
+  const [deviceLatitude, setDeviceLatitude] = React.useState('');
+  const [deviceLongitude, setDeviceLongitude] = React.useState('');
+  const { deviceId } = useParams();
   const [measurementTypeList, setMeasurementTypeList] = React.useState([]);
   const [selectedMeasurementTypes, setSelectedMeasurementTypes] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isMeasurementTypeListLoaded, setIsMeasurementTypeListLoaded] = React.useState(false);
+  const [isDeviceDataLoaded, setIsDeviceDataLoaded] = React.useState(false);
+  const [isSubmitEnabled, setIsSubmitEnabled] = React.useState(true);
   const navigate = useNavigate();
 
   React.useEffect(() => {
     getAllMeasurementTypes();
+    getDeviceById();
     setSelectedPage('Manage devices');
   }, []);
 
+  const handleDeviceNameChange = (event) => {
+    setDeviceName(event.target.value);
+  };
+
   const handleLatitudeChange = (event) => {
-    setLatitudeValue(event.target.value);
+    setDeviceLatitude(event.target.value);
   };
 
   const handleLongitudeChange = (event) => {
-    setLongitudeValue(event.target.value);
+    setDeviceLongitude(event.target.value);
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const name = data.get('name');
-    if (name && latitudeValue && longitudeValue && selectedMeasurementTypes.length > 0) {
+    if (name && deviceLatitude && deviceLongitude && selectedMeasurementTypes.length > 0) {
         const measuredDataTypes =  measurementTypeList.filter(measurementType => {
           const measurementTypeLabelKey =  measurementType.name + ' (' + measurementType.unit + ')';
           return selectedMeasurementTypes.some(selectedMeasurementType => selectedMeasurementType === measurementTypeLabelKey);
         });
-        const request = { name, latitude: Number(latitudeValue), longitude: Number(longitudeValue), measuredDataTypes };
-        addNewDevice(request);
+        const request = { id: deviceId, name, latitude: Number(deviceLatitude), longitude: Number(deviceLongitude), measuredDataTypes };
+        updateDevice(request);
     }
     else {
         toast.warning('Please fill in all required fields!');
@@ -153,11 +160,30 @@ export default function CreateDevice() {
     );
   };
 
+  async function getDeviceById() {
+    await API(Endpoints.BASE_ENDPOINT, user.token).get(`${Endpoints.GET_DEVICE_BY_ID}?deviceId=${deviceId}`)
+        .then( response => {
+            if (response.status === ResponseStatus.SUCCESS) {
+                const data = response.data;
+                setDeviceName(data.name);
+                setDeviceLatitude(String(data.latitude));
+                setDeviceLongitude(String(data.longitude));
+                const deviceSelectedMeasurementTypes = data.measuredDataTypes.map(dataType => dataType.measurementType + ' (' + dataType.unit + ')');
+                setSelectedMeasurementTypes(deviceSelectedMeasurementTypes); 
+                setIsDeviceDataLoaded(true);
+            }
+            else {
+              toast.error('There was an error loading page data!');
+            }
+        })
+        .catch(error => ( error ));
+  }
+
   async function getAllMeasurementTypes() {
     await API(Endpoints.BASE_ENDPOINT, user.token).get(Endpoints.GET_ALL_MEASUREMENT_TYPES)
         .then( response => {
             if (response.status === ResponseStatus.SUCCESS) {
-                setIsLoading(false);
+                setIsMeasurementTypeListLoaded(true);
                 setMeasurementTypeList(response.data);
             }
             else {
@@ -167,24 +193,20 @@ export default function CreateDevice() {
         .catch(error => ( error ));
   }
 
-  async function addNewDevice(request) {
+  async function updateDevice(request) {
+    toast.info('Updating device info...');
     setIsSubmitEnabled(false);
-    toast.info('Adding new device...');
-    await API(Endpoints.BASE_ENDPOINT, user.token).post(Endpoints.CREATE_DEVICE, request)
+    await API(Endpoints.BASE_ENDPOINT, user.token).put(Endpoints.UPDATE_DEVICES, request)
         .then( response => {
             if (response.status === ResponseStatus.SUCCESS) {
-                setIsFormFieldsEnabled(false);
-                setDeviceId(response.data);
-                toast.success('Device created successfully!');
-            }
-            else {
-              setIsSubmitEnabled(true);
+                toast.success('Device updated successfully!');
+                setIsSubmitEnabled(true);
             }
         })
         .catch(error => ( error ));
   }
 
-  if (isLoading) {
+  if (!isMeasurementTypeListLoaded || !isDeviceDataLoaded) {
     return (
       <Loading/>
     );
@@ -211,7 +233,7 @@ export default function CreateDevice() {
             <SensorsIcon fontSize='large'/>
           </Avatar>
           <Typography component="h1" variant="h5">
-            Add new device
+            Edit device
           </Typography>
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
@@ -219,11 +241,12 @@ export default function CreateDevice() {
                 <TextField
                   autoComplete="given-name"
                   name="name"
+                  value={deviceName}
+                  onChange={handleDeviceNameChange}
                   required
                   fullWidth
                   id="name"
                   label="Device Name"
-                  disabled={!isFormFieldsEnabled}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -232,10 +255,9 @@ export default function CreateDevice() {
                   fullWidth
                   id="latitude"
                   label="Latitude"
-                  value={latitudeValue}
+                  value={deviceLatitude}
                   onChange={handleLatitudeChange}
                   name="latitude"
-                  disabled={!isFormFieldsEnabled}
                   InputProps={{
                     inputComponent: latitudeMaskCustom,
                   }}
@@ -248,9 +270,8 @@ export default function CreateDevice() {
                   label="Longitude"
                   id="longitude"
                   name="longitude"
-                  value={longitudeValue}
+                  value={deviceLongitude}
                   onChange={handleLongitudeChange}
-                  disabled={!isFormFieldsEnabled}
                   InputProps={{
                     inputComponent: longitudeMaskCustom,
                   }}
@@ -264,7 +285,6 @@ export default function CreateDevice() {
                     id="demo-multiple-chip"
                     multiple
                     value={selectedMeasurementTypes}
-                    disabled={!isFormFieldsEnabled}
                     onChange={onSelectedMeasurementTypeChange}
                     input={<OutlinedInput id="select-multiple-chip" label="Select measurement types" />}
                     renderValue={(selected) => (
@@ -301,20 +321,15 @@ export default function CreateDevice() {
                   disabled
                 />
               </Grid>
-              { isFormFieldsEnabled && (
-              <Grid item xs={12}>
-                <FormLabel style={{color: 'red', fontSize: '14px'}} >* The Device Identifier field will be filled in after clicking on the add device button</FormLabel>
-              </Grid>
-              )}
             </Grid>
             <Button
               type="submit"
               fullWidth
-              variant="contained"
               disabled={!isSubmitEnabled}
+              variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Add device
+              Update device
             </Button>
           </Box>
         </Box>
