@@ -1,11 +1,12 @@
 import { AuthContext } from '../../contexts/auth';
 import * as React from 'react';
 import './mainDashboard.css'
-import { MapContainer, TileLayer, Marker, Popup, Tooltip } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, LayersControl, FeatureGroup } from 'react-leaflet'
 import L from 'leaflet';
 import Loading from '../Loading/Loading';
 import * as Endpoints from '../../entities/endPoints';
 import * as ResponseStatus from '../../entities/responseStatus';
+import * as MeasurementTypes from '../../entities/measurementTypes';
 import OptionsConfirmationModal from '../ConfirmationModal/OptionsConfirmationModal'
 
 
@@ -24,16 +25,27 @@ function MainDashboard() {
     const [selectedDevice, setSelectedDevice] = React.useState(null);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [isBrowserLocationEnabled, setIsBrowserLocationEnabled] = React.useState(null);
+    const [mapAppliedFilters, setMapAppliedFilters] = React.useState([]);
+    const [deviceListData, setDeviceListData] = React.useState([]);
     const [mapData, setMapData] = React.useState([]);
     const [userLocation, setUserLocation] = React.useState(null);
     const { API, setSelectedPage, user } = React.useContext(AuthContext); 
 
     React.useEffect(() => {
-
         getUsersLocation();
         getActiveDevicesAsync();
         setSelectedPage('Main Dashboard');
     }, []);
+
+    React.useEffect(() => {
+        let newMapData = deviceListData;
+        if (mapAppliedFilters.length > 0) {
+            newMapData = deviceListData.filter(device => {
+                return device.measuredDataTypes.some(measuredDataType => mapAppliedFilters.indexOf(measuredDataType.measurementType) !== -1);
+            });
+        } 
+        setMapData(newMapData);
+    }, [mapAppliedFilters.length]);
 
     const getUsersLocation = () => {
         navigator.geolocation.getCurrentPosition(
@@ -53,6 +65,7 @@ function MainDashboard() {
             .then( response => {
                 if (response.status === ResponseStatus.SUCCESS) {
                     setMapData(response.data);
+                    setDeviceListData(response.data);
                     setIsDataAvailable(true);
                 }
             })
@@ -66,6 +79,22 @@ function MainDashboard() {
 
     const handleModalCancelClick = () => {
         setIsModalOpen(false);
+    }
+
+    const addMapAppliedFilter = (filter) => {
+        const newMapAppliedFilters = mapAppliedFilters.slice();
+        newMapAppliedFilters.push(filter);
+        setMapAppliedFilters(newMapAppliedFilters);
+    }
+
+    const removeMapAppliedFilter = (filter) => {
+        const newMapAppliedFilters = mapAppliedFilters.slice();
+        const index = newMapAppliedFilters.indexOf(filter);
+        newMapAppliedFilters.splice(index, 1);
+        setMapAppliedFilters(newMapAppliedFilters);
+        if (newMapAppliedFilters.length === 0) {
+            setMapData(deviceListData);
+        }
     }
 
     if (!isDataAvailable || isBrowserLocationEnabled === null) {
@@ -82,6 +111,80 @@ function MainDashboard() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
+                <LayersControl position="topright">
+                    <LayersControl.Overlay name="Filter temperature measuring devices">
+                        <FeatureGroup
+                            eventHandlers={{
+                            add: (e) => {
+                                addMapAppliedFilter(MeasurementTypes.TEMPERATURE);
+                            },
+                            remove: (e) => {
+                                removeMapAppliedFilter(MeasurementTypes.TEMPERATURE);
+                            }
+                            }}
+                        />
+                    </LayersControl.Overlay>
+                    <LayersControl.Overlay name="Filter humidity measuring devices">
+                        <FeatureGroup
+                            eventHandlers={{
+                            add: (e) => {
+                                addMapAppliedFilter(MeasurementTypes.HUMIDITY);
+                            },
+                            remove: (e) => {
+                                removeMapAppliedFilter(MeasurementTypes.HUMIDITY);
+                            }
+                            }}
+                        />
+                    </LayersControl.Overlay>
+                    <LayersControl.Overlay name="Filter linear acceleration measuring devices">
+                        <FeatureGroup
+                            eventHandlers={{
+                            add: (e) => {
+                                addMapAppliedFilter(MeasurementTypes.LINEAR_ACCELERATION);
+                            },
+                            remove: (e) => {
+                                removeMapAppliedFilter(MeasurementTypes.LINEAR_ACCELERATION);
+                            }
+                            }}
+                        />
+                    </LayersControl.Overlay>
+                    <LayersControl.Overlay name="Filter angular acceleration measuring devices">
+                        <FeatureGroup
+                            eventHandlers={{
+                            add: (e) => {
+                                addMapAppliedFilter(MeasurementTypes.ANGULAR_ACCELERATION);
+                            },
+                            remove: (e) => {
+                                removeMapAppliedFilter(MeasurementTypes.ANGULAR_ACCELERATION);
+                            }
+                            }}
+                        />
+                    </LayersControl.Overlay>
+                    <LayersControl.Overlay name="Filter rainfall level measuring devices">
+                        <FeatureGroup
+                            eventHandlers={{
+                            add: (e) => {
+                                addMapAppliedFilter(MeasurementTypes.RAINFALL_LEVEL);
+                            },
+                            remove: (e) => {
+                                removeMapAppliedFilter(MeasurementTypes.RAINFALL_LEVEL);
+                            }
+                            }}
+                        />
+                    </LayersControl.Overlay>
+                    <LayersControl.Overlay name="Filter poro pressure measuring devices">
+                        <FeatureGroup
+                            eventHandlers={{
+                            add: (e) => {
+                                addMapAppliedFilter(MeasurementTypes.PORO_PRESSURE);
+                            },
+                            remove: (e) => {
+                                removeMapAppliedFilter(MeasurementTypes.PORO_PRESSURE);
+                            }
+                            }}
+                        />
+                    </LayersControl.Overlay>
+                </LayersControl>
                 {userLocation !==null && 
                     <Marker position={userLocation}>
                          <Tooltip sticky>This is your current location!</Tooltip>
