@@ -17,3 +17,4 @@ export const GET_HOURLY_HUMIDITY_DATA = '/humidity/getHourlyMeasurementsByDevice
 export const GET_ALL_MEASUREMENT_TYPES = '/measurementType/getAll';
 export const GET_DEVICE_BY_ID = '/devices/getDeviceById';
 export const UPDATE_DEVICES = '/devices';
+export const GET_DEVICE_MEASUREMENT_TYPES = '/getDeviceMeasurementTypes';

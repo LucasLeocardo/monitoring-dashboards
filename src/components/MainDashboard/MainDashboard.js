@@ -112,7 +112,7 @@ function MainDashboard() {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <LayersControl position="topright">
-                    <LayersControl.Overlay name="Filter temperature measuring devices">
+                    <LayersControl.Overlay name="Temperature devices">
                         <FeatureGroup
                             eventHandlers={{
                             add: (e) => {
@@ -124,7 +124,7 @@ function MainDashboard() {
                             }}
                         />
                     </LayersControl.Overlay>
-                    <LayersControl.Overlay name="Filter humidity measuring devices">
+                    <LayersControl.Overlay name="Humidity devices">
                         <FeatureGroup
                             eventHandlers={{
                             add: (e) => {
@@ -136,7 +136,7 @@ function MainDashboard() {
                             }}
                         />
                     </LayersControl.Overlay>
-                    <LayersControl.Overlay name="Filter linear acceleration measuring devices">
+                    <LayersControl.Overlay name="Linear acceleration devices">
                         <FeatureGroup
                             eventHandlers={{
                             add: (e) => {
@@ -148,7 +148,7 @@ function MainDashboard() {
                             }}
                         />
                     </LayersControl.Overlay>
-                    <LayersControl.Overlay name="Filter angular acceleration measuring devices">
+                    <LayersControl.Overlay name="Angular acceleration devices">
                         <FeatureGroup
                             eventHandlers={{
                             add: (e) => {
@@ -160,7 +160,7 @@ function MainDashboard() {
                             }}
                         />
                     </LayersControl.Overlay>
-                    <LayersControl.Overlay name="Filter rainfall level measuring devices">
+                    <LayersControl.Overlay name="Rainfall level devices">
                         <FeatureGroup
                             eventHandlers={{
                             add: (e) => {
@@ -172,7 +172,7 @@ function MainDashboard() {
                             }}
                         />
                     </LayersControl.Overlay>
-                    <LayersControl.Overlay name="Filter poro pressure measuring devices">
+                    <LayersControl.Overlay name="Poro pressure devices">
                         <FeatureGroup
                             eventHandlers={{
                             add: (e) => {

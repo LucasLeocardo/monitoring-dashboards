@@ -11,45 +11,23 @@ import Stack from '@mui/material/Stack';
 import Loading from '../Loading/Loading';
 import * as ResponseStatus from '../../entities/responseStatus';
 import { useNavigate } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import {
-    InfoCardContent,
-    InfoCardFooter,
-    InfoCardTitle
-  } from "../Info-elements/info-elements";
-import VerticalInfoMeter from '../Vertical-info-meter/vertical-info-meter';
-import { BsFillDropletFill } from "react-icons/bs";
-import { FaTemperatureHigh } from "react-icons/fa";
-import { SiSpeedtest } from "react-icons/si";
-import NumberIndex from '../Number-index/number-index'
-import { UNIT_CAPTION, INDEX_POSITION } from '../../entities/constants'
-import Thermometer from 'react-thermometer-component'
-import ReactSpeedometer from "react-d3-speedometer";
-const { Index } = require("../../components/Number-index/number-index.styles");
-
-const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    height: '270px',
-    color: theme.palette.text.secondary,
-  }));
-
+import { UNIT_CAPTION } from '../../entities/constants'
+import GaugeChartLinearAcceleration from '../GaugeChartLinearAcceleration/GaugeChartLinearAcceleration';
+import GaugeChartAngularAcceleration from '../GaugeChartAngularAcceleration/GaugeChartAngularAcceleration';
+import GaugeChartHumidity from '../GaugeChartHumidity/GaugeChartHumidity';
+import GaugeChartTemperature from '../GaugeChartTemperature/GaugeChartTemperature';
+import GaugeChartPressure from '../GaugeChartPressure/GaugeChartPressure';
+import GaugeChartRainfallLevel from '../GaugeChartRainFallLevel/GaugeChartRainFallLevel';
+import * as MeasurementTypes from '../../entities/measurementTypes';
 
 export default function ViewRealTimeData() {
 
     const { deviceId } = useParams();
     const navigate = useNavigate();
     const [isDataAvailable, setIsDataAvailable] = React.useState(false);
+    const [isMeasurementTypesAvailable, setIsMeasurementTypesAvailable] = React.useState(false);
     const [deviceList, setDeviceList] =  React.useState([]);
     const { API, setSelectedPage, user, setUser } = React.useContext(AuthContext); 
     const [isSocketConnected, setIsSocketConnected] = React.useState(false);
@@ -61,10 +39,14 @@ export default function ViewRealTimeData() {
     const [alphaZ, setAlphaZ] = React.useState(0);
     const [temperature, setTemperature] = React.useState(0);
     const [humidity, setHumidity] = React.useState(0);
+    const [rainfallLevel, setRainfallLevel] = React.useState(0);
+    const [poroPressure, setPoroPressure] = React.useState(0);
+    const [deviceMeasurementTypes, setDeviceMeasurementTypes] =  React.useState([]);
     const mounted = React.useRef();
 
     React.useEffect(() => {
         const socket = configureSocketConnection(deviceId);
+        getDeviceMeasurementTypesAysnc();
         if (!mounted.current) { 
             getActiveDevicesAsync();
             setSelectedPage('');
@@ -80,8 +62,21 @@ export default function ViewRealTimeData() {
             setAlphaZ(0);
             setTemperature(0);
             setHumidity(0);
+            setRainfallLevel(0);
+            setPoroPressure(0);
         };
     }, [deviceId]);
+
+    const getDeviceMeasurementTypesAysnc = async () => {
+        await API(EndPoints.BASE_ENDPOINT, user.token).get(`${EndPoints.GET_DEVICE_MEASUREMENT_TYPES}?deviceId=${deviceId}`)
+            .then( response => {
+                if (response.status === ResponseStatus.SUCCESS) {
+                    setDeviceMeasurementTypes(response.data);
+                    setIsMeasurementTypesAvailable(true);
+                }
+            })
+            .catch(error => ( error ));
+    }
 
     const getActiveDevicesAsync = async () => {
         await API(EndPoints.BASE_ENDPOINT, user.token).get(EndPoints.GET_ACTIVE_DEVICES)
@@ -119,10 +114,13 @@ export default function ViewRealTimeData() {
             setIsSocketConnected(false);
         });
 
-        socket.on("vibration-data", (data) => {
+        socket.on("linear-acceleration-data", (data) => {
             setAcelX(data.acelX);
             setAcelY(data.acelY);
             setAcelZ(data.acelZ);
+        });
+
+        socket.on("angular-acceleration-data", (data) => {
             setAlphaX(data.alphaX);
             setAlphaY(data.alphaY);
             setAlphaZ(data.alphaZ);
@@ -134,6 +132,14 @@ export default function ViewRealTimeData() {
 
         socket.on("humidity-data", (data) => {
             setHumidity(data.humidity);
+        });
+
+        socket.on("rainfall-level-data", (data) => {
+            setRainfallLevel(data.rainfallLevel);
+        });
+
+        socket.on("poro-pressure-data", (data) => {
+            setPoroPressure(data.poroPressure);
         });
 
         return socket;
@@ -150,7 +156,7 @@ export default function ViewRealTimeData() {
         return defaultDevice
     }
 
-    if (!isDataAvailable) {
+    if (!isDataAvailable || !isMeasurementTypesAvailable) {
         return (
             <Loading/>
         );
@@ -179,232 +185,96 @@ export default function ViewRealTimeData() {
             </Stack>
             <Box sx={{ flexGrow: 1, marginTop: '40px', paddingBottom: '40px' }}>
                 <Grid container spacing={4}>
-                    <Grid item xs={4}>
-                        <Item>
-                            <InfoCardTitle>Acceleration X</InfoCardTitle>
-                            <InfoCardContent marginTop="30px">
-                                <ReactSpeedometer
-                                    maxValue={20}
-                                    minValue={-20}
-                                    height={190}
-                                    width={290}
-                                    value={acelX}
-                                    needleTransition="easeQuadIn"
-                                    needleTransitionDuration={1000}
-                                    needleColor="red"
-                                    startColor="green"
-                                    segments={10}
-                                    endColor="blue"
-                                />
-                            </InfoCardContent>
-                            <InfoCardFooter>
-                                <SiSpeedtest color="#c6c6c6" size={35} />
-                                <Index
-                                    style={{
-                                    fontSize: 24,
-                                    justifyContent: "center"
-                                    }}
-                                >
-                                    {UNIT_CAPTION["ACCELETATION"]}
-                                </Index>
-                            </InfoCardFooter>
-                        </Item>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Item>
-                            <InfoCardTitle>Acceleration Y</InfoCardTitle>
-                            <InfoCardContent marginTop="30px">
-                                <ReactSpeedometer
-                                    maxValue={20}
-                                    minValue={-20}
-                                    height={190}
-                                    width={290}
-                                    value={acelY}
-                                    needleTransition="easeQuadIn"
-                                    needleTransitionDuration={1000}
-                                    needleColor="red"
-                                    startColor="green"
-                                    segments={10}
-                                    endColor="blue"
-                                />
-                            </InfoCardContent>
-                            <InfoCardFooter>
-                                <SiSpeedtest color="#c6c6c6" size={35} />
-                                <Index
-                                    style={{
-                                    fontSize: 24,
-                                    justifyContent: "center"
-                                    }}
-                                >
-                                    {UNIT_CAPTION["ACCELETATION"]}
-                                </Index>
-                            </InfoCardFooter>
-                        </Item>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Item>
-                            <InfoCardTitle>Acceleration Z</InfoCardTitle>
-                            <InfoCardContent marginTop="30px">
-                                <ReactSpeedometer
-                                    maxValue={20}
-                                    minValue={-20}
-                                    height={190}
-                                    width={290}
-                                    value={acelZ}
-                                    needleTransition="easeQuadIn"
-                                    needleTransitionDuration={1000}
-                                    needleColor="red"
-                                    startColor="green"
-                                    segments={10}
-                                    endColor="blue"
-                                />
-                            </InfoCardContent>
-                            <InfoCardFooter>
-                                <SiSpeedtest color="#c6c6c6" size={35} />
-                                <Index
-                                    style={{
-                                    fontSize: 24,
-                                    justifyContent: "center"
-                                    }}
-                                >
-                                    {UNIT_CAPTION["ACCELETATION"]}
-                                </Index>
-                            </InfoCardFooter>
-                        </Item>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Item>
-                            <InfoCardTitle>Angular acceleration X</InfoCardTitle>
-                            <InfoCardContent marginTop="30px">
-                            <ReactSpeedometer
-                                    maxValue={10}
-                                    minValue={-10}
-                                    height={190}
-                                    width={290}
-                                    value={alphaX}
-                                    needleTransition="easeQuadIn"
-                                    needleTransitionDuration={1000}
-                                    needleColor="gray"
-                                    startColor="red"
-                                    segments={10}
-                                    endColor="yellow"
-                                />
-                            </InfoCardContent>
-                            <InfoCardFooter>
-                                <SiSpeedtest color="#c6c6c6" size={35} />
-                                <Index
-                                    style={{
-                                    fontSize: 24,
-                                    justifyContent: "center"
-                                    }}
-                                >
-                                    {UNIT_CAPTION["ANGULAR ACCELETATION"]}
-                                </Index>
-                            </InfoCardFooter>
-                        </Item>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Item>
-                            <InfoCardTitle>Angular acceleration Y</InfoCardTitle>
-                            <InfoCardContent marginTop="30px">
-                                <ReactSpeedometer
-                                    maxValue={10}
-                                    minValue={-10}
-                                    height={190}
-                                    width={290}
-                                    value={alphaY}
-                                    needleTransition="easeQuadIn"
-                                    needleTransitionDuration={1000}
-                                    needleColor="gray"
-                                    startColor="red"
-                                    segments={10}
-                                    endColor="yellow"
-                                />
-                            </InfoCardContent>
-                            <InfoCardFooter>
-                                <SiSpeedtest color="#c6c6c6" size={35} />
-                                <Index
-                                    style={{
-                                    fontSize: 24,
-                                    justifyContent: "center"
-                                    }}
-                                >
-                                    {UNIT_CAPTION["ANGULAR ACCELETATION"]}
-                                </Index>
-                            </InfoCardFooter>
-                        </Item>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Item>
-                            <InfoCardTitle>Angular acceleration Z</InfoCardTitle>
-                            <InfoCardContent marginTop="30px">
-                                <ReactSpeedometer
-                                    maxValue={10}
-                                    minValue={-10}
-                                    height={190}
-                                    width={290}
-                                    value={alphaZ}
-                                    needleTransition="easeQuadIn"
-                                    needleTransitionDuration={1000}
-                                    needleColor="gray"
-                                    startColor="red"
-                                    segments={10}
-                                    endColor="yellow"
-                                />
-                            </InfoCardContent>
-                            <InfoCardFooter>
-                                <SiSpeedtest color="#c6c6c6" size={35} />
-                                <Index
-                                    style={{
-                                    fontSize: 24,
-                                    justifyContent: "center"
-                                    }}
-                                >
-                                    {UNIT_CAPTION["ANGULAR ACCELETATION"]}
-                                </Index>
-                            </InfoCardFooter>
-                        </Item>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Item>
-                            <InfoCardTitle>Humidity</InfoCardTitle>
-                            <InfoCardContent>
-                                <NumberIndex index="%" size={48}>
-                                {humidity}
-                                </NumberIndex>
-                                <VerticalInfoMeter value={humidity} />
-                            </InfoCardContent>
-                            <InfoCardFooter>
-                                <BsFillDropletFill color="#c6c6c6" size={35} />
-                            </InfoCardFooter>
-                        </Item>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Item>
-                            <InfoCardTitle>Temperature</InfoCardTitle>
-                            <InfoCardContent>
-                                <NumberIndex 
-                                    index={UNIT_CAPTION["CELSIUS"]} 
-                                    size={48}
-                                    indexPosition={INDEX_POSITION.RIGHT_TOP}
-                                >
-                                {temperature}
-                                </NumberIndex>
-                                <Thermometer
-                                    theme="light"
-                                    value={temperature}
-                                    max="100"
-                                    steps="1"
-                                    format="°C"
-                                    size="normal"
-                                    height="180"
-                                />
-                            </InfoCardContent>
-                            <InfoCardFooter>
-                                <FaTemperatureHigh color="#c6c6c6" size={35} />
-                            </InfoCardFooter>
-                        </Item>
-                    </Grid>
+                    {deviceMeasurementTypes.includes(MeasurementTypes.LINEAR_ACCELERATION) && (
+                    <React.Fragment>
+                        <Grid item xs={4}>
+                            <GaugeChartLinearAcceleration
+                                cardTitle="Acceleration X"
+                                cardValue={acelX}
+                                cardUnit={UNIT_CAPTION["ACCELETATION"]}
+                            />
+                        </Grid>
+                        <Grid item xs={4}>
+                            <GaugeChartLinearAcceleration
+                                cardTitle="Acceleration Y"
+                                cardValue={acelY}
+                                cardUnit={UNIT_CAPTION["ACCELETATION"]}
+                            />
+                        </Grid>
+                        <Grid item xs={4}>
+                            <GaugeChartLinearAcceleration
+                                cardTitle="Acceleration Z"
+                                cardValue={acelZ}
+                                cardUnit={UNIT_CAPTION["ACCELETATION"]}
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
+                    {deviceMeasurementTypes.includes(MeasurementTypes.ANGULAR_ACCELERATION) &&
+                    (<React.Fragment>
+                        <Grid item xs={4}>
+                            <GaugeChartAngularAcceleration
+                                cardTitle="Angular acceleration X"
+                                cardValue={alphaX}
+                                cardUnit={UNIT_CAPTION["ANGULAR ACCELETATION"]}
+                            />
+                        </Grid>
+                        <Grid item xs={4}>
+                            <GaugeChartAngularAcceleration
+                                cardTitle="Angular acceleration Y"
+                                cardValue={alphaY}
+                                cardUnit={UNIT_CAPTION["ANGULAR ACCELETATION"]}
+                            />
+                        </Grid>
+                        <Grid item xs={4}>
+                            <GaugeChartAngularAcceleration
+                                cardTitle="Angular acceleration Z"
+                                cardValue={alphaZ}
+                                cardUnit={UNIT_CAPTION["ANGULAR ACCELETATION"]}
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
+                    {deviceMeasurementTypes.includes(MeasurementTypes.HUMIDITY) &&
+                    (<React.Fragment>
+                        <Grid item xs={4}>
+                            <GaugeChartHumidity
+                                cardValue={humidity}
+                                cardUnit="%"
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
+                    {deviceMeasurementTypes.includes(MeasurementTypes.TEMPERATURE) &&
+                    (<React.Fragment>
+                        <Grid item xs={4}>
+                            <GaugeChartTemperature
+                                cardValue={temperature}
+                                cardUnit={UNIT_CAPTION["CELSIUS"]} 
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
+                    {deviceMeasurementTypes.includes(MeasurementTypes.PORO_PRESSURE) &&
+                    (<React.Fragment>
+                        <Grid item xs={4}>
+                            <GaugeChartPressure
+                                cardValue={poroPressure}
+                                cardUnit="Pa"
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
+                    {deviceMeasurementTypes.includes(MeasurementTypes.RAINFALL_LEVEL) &&
+                    (<React.Fragment>
+                        <Grid item xs={4}>
+                            <GaugeChartRainfallLevel
+                                cardValue={rainfallLevel}
+                                cardUnit="mm"
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
                 </Grid>
             </Box>
         </div>
