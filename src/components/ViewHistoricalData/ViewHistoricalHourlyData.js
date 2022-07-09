@@ -8,16 +8,19 @@ import Autocomplete from '@mui/material/Autocomplete';
 import * as EndPoints from '../../entities/endPoints'
 import Loading from '../Loading/Loading';
 import TextField from '@mui/material/TextField';
+import AlarmIcon from '@mui/icons-material/Alarm';
+import SnoozeIcon from '@mui/icons-material/Snooze';
+import ClockIcon from '@mui/icons-material/AccessTime';
 import { useParams } from "react-router-dom";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import Box from '@mui/material/Box';
 import Moment from 'moment';
 import Grid from '@mui/material/Grid';
 import * as MeasurementTypes from '../../entities/measurementTypes';
 import VibrationHistoricalChart from '../HistoricalCharts/VibrationHistoricalChart';
 import SingleValueHistoricalChart from '../HistoricalCharts/SingleValueHistoricalChart';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 
 const callbackTimeObj = { callback: (label, index, ticks) => {
       const format = 'ddd:hh A'; // Change how you please
@@ -46,6 +49,7 @@ export default function ViewHistoricalHourlyData() {
     const [poroPressureDataList, setPoroPressureDataList] =  React.useState([]);
     const [isPoroPressureDataAvailable, setIsPoroPressureDataAvailable] = React.useState(false);
     const mounted = React.useRef();
+    const [minPickerDate, setMinPickerDate] = React.useState(new Date());
     const [startDate, setStartDate] = React.useState(new Date());
     const [endDate, setEndDate] = React.useState(new Date());
     const [deviceMeasurementTypes, setDeviceMeasurementTypes] =  React.useState([]);
@@ -54,6 +58,7 @@ export default function ViewHistoricalHourlyData() {
     React.useEffect(() => {
         if (!mounted.current) { 
             startDate.setHours(startDate.getHours() - 12);
+            minPickerDate.setHours(minPickerDate.getHours() - 24);
             getActiveDevicesAsync();
             setSelectedPage('');
             mounted.current = true;
@@ -91,26 +96,28 @@ export default function ViewHistoricalHourlyData() {
     }
 
     const getHourlyMeasurements = () => {
-        const requestStartDate = startDate.toISOString();
-        const requestEndDate = endDate.toISOString();
-        const requestBody = {deviceId, startDate: requestStartDate, endDate: requestEndDate};
-        if (deviceMeasurementTypes.includes(MeasurementTypes.LINEAR_ACCELERATION)) {
-            getHourlyLinearAccelerationDataAsync(requestBody);
-        }
-        if (deviceMeasurementTypes.includes(MeasurementTypes.ANGULAR_ACCELERATION)) {
-            getHourlyAngularAccelerationDataAsync(requestBody);
-        }
-        if (deviceMeasurementTypes.includes(MeasurementTypes.TEMPERATURE)) {
-            getHourlyTemperatureDataAsync(requestBody);
-        }
-        if (deviceMeasurementTypes.includes(MeasurementTypes.HUMIDITY)) {
-            getHourlyHumidityDataAsync(requestBody);
-        }
-        if (deviceMeasurementTypes.includes(MeasurementTypes.RAINFALL_LEVEL)) {
-            getHourlyRainfallLevelDataAsync(requestBody);
-        }
-        if (deviceMeasurementTypes.includes(MeasurementTypes.PORO_PRESSURE)) {
-            getHourlyPoroPressureDataAsync(requestBody);
+        if (!isNaN(startDate) && !isNaN(endDate) && startDate.getDay() >= minPickerDate.getDay() && endDate.getDay() >= minPickerDate.getDay()) {
+            const requestStartDate = startDate.toISOString();
+            const requestEndDate = endDate.toISOString();
+            const requestBody = {deviceId, startDate: requestStartDate, endDate: requestEndDate};
+            if (deviceMeasurementTypes.includes(MeasurementTypes.LINEAR_ACCELERATION)) {
+                getHourlyLinearAccelerationDataAsync(requestBody);
+            }
+            if (deviceMeasurementTypes.includes(MeasurementTypes.ANGULAR_ACCELERATION)) {
+                getHourlyAngularAccelerationDataAsync(requestBody);
+            }
+            if (deviceMeasurementTypes.includes(MeasurementTypes.TEMPERATURE)) {
+                getHourlyTemperatureDataAsync(requestBody);
+            }
+            if (deviceMeasurementTypes.includes(MeasurementTypes.HUMIDITY)) {
+                getHourlyHumidityDataAsync(requestBody);
+            }
+            if (deviceMeasurementTypes.includes(MeasurementTypes.RAINFALL_LEVEL)) {
+                getHourlyRainfallLevelDataAsync(requestBody);
+            }
+            if (deviceMeasurementTypes.includes(MeasurementTypes.PORO_PRESSURE)) {
+                getHourlyPoroPressureDataAsync(requestBody);
+            }
         }
     }
 
@@ -237,21 +244,43 @@ export default function ViewHistoricalHourlyData() {
                 </Stack>
                 <Stack spacing={3} sx={{ width: '600px', display: 'flex', flexDirection: 'row', justifyContent: 'space-around'}}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <TimePicker
-                            label="Start time (Yesterday)"
+                        <DateTimePicker
+                            label="Start time"
+                            disableFuture
+                            hideTabs
+                            openTo="hours"
                             value={startDate}
                             onChange={(newValue) => {
                                 onStarDateChange(newValue);
                             }}
-                            renderInput={(params) => <TextField {...params} />}
+                            minDate={minPickerDate}
+                            components={{
+                                LeftArrowIcon: AlarmIcon,
+                                RightArrowIcon: SnoozeIcon,
+                                OpenPickerIcon: ClockIcon,
+                            }}
+                            renderInput={(params) => (
+                                <TextField {...params} />
+                            )}
                         />
-                        <TimePicker
-                            label="End time (Today)"
+                        <DateTimePicker
+                            label="End time"
+                            disableFuture
+                            hideTabs
+                            openTo="hours"
                             value={endDate}
                             onChange={(newValue) => {
                                 onEndDateChange(newValue);
                             }}
-                            renderInput={(params) => <TextField {...params} />}
+                            minDate={minPickerDate}
+                            components={{
+                                LeftArrowIcon: AlarmIcon,
+                                RightArrowIcon: SnoozeIcon,
+                                OpenPickerIcon: ClockIcon,
+                            }}
+                            renderInput={(params) => (
+                                <TextField {...params} />
+                            )}
                         />
                     </LocalizationProvider>
                 </Stack>
