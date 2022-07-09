@@ -22,7 +22,6 @@ import * as MeasurementTypes from '../../entities/measurementTypes';
 const callbackTimeObj = { callback: (label, index, ticks) => {
     const format = 'MMM DD'; // Change how you please
     return new Moment(ticks[index].value)
-      .utcOffset(-21600 / 60)
       .format(format);
 } }
 

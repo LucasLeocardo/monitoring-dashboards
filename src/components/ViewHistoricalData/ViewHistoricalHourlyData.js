@@ -20,7 +20,7 @@ import VibrationHistoricalChart from '../HistoricalCharts/VibrationHistoricalCha
 import SingleValueHistoricalChart from '../HistoricalCharts/SingleValueHistoricalChart';
 
 const callbackTimeObj = { callback: (label, index, ticks) => {
-      const format = 'hh A'; // Change how you please
+      const format = 'ddd:hh A'; // Change how you please
       return new Moment(ticks[index].value)
         .utcOffset(-21600 / 60)
         .format(format);
