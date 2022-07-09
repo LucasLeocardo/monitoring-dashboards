@@ -1,12 +1,19 @@
 import './loading.css';
 import loading from '../../assets/loader.svg';
+import PropTypes from 'prop-types';
 
-function Loading() {
+function Loading(props) {
+    const { hasMarginTop } = props;
+
     return (
-        <div className='loaderContainer'>
+        <div className={hasMarginTop ? 'loaderContainerMarginTop' : 'loaderContainer'}>
             <img src={loading} alt='Loading' />
         </div>
     );
 }
 
 export default Loading;
+
+Loading.propTypes = {
+    hasMarginTop: PropTypes.bool
+};

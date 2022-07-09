@@ -187,6 +187,7 @@ export default function ViewHistoricalDailyData() {
     const onSelectedDeviceChange = (event, values) => {
         if (values) {
             navigate(`/view-historical-daily-data/${values._id}`);
+            setIsMeasurementTypesAvailable(false);
         }
     }
 
@@ -255,7 +256,8 @@ export default function ViewHistoricalDailyData() {
                 </Stack>
             </Stack>
             <Box sx={{ flexGrow: 1, marginTop: '40px', paddingBottom: '40px' }}>
-                <Grid container spacing={4}>
+                {!isMeasurementTypesAvailable? <Loading hasMarginTop/> :
+                (<Grid container spacing={4}>
                     {deviceMeasurementTypes.includes(MeasurementTypes.LINEAR_ACCELERATION) && (
                     <React.Fragment>
                         <Grid item xs={12}>
@@ -354,7 +356,7 @@ export default function ViewHistoricalDailyData() {
                         </Grid>
                     </React.Fragment>
                     )}
-                </Grid>
+                </Grid>)}
             </Box>
         </div>
     );

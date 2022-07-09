@@ -148,6 +148,7 @@ export default function ViewRealTimeData() {
     const onSelectedDeviceChange = (event, values) => {
         if (values) {
             navigate(`/view-real-time-data/${values._id}`);
+            setIsMeasurementTypesAvailable(false);
         }
     }
 
@@ -156,7 +157,7 @@ export default function ViewRealTimeData() {
         return defaultDevice
     }
 
-    if (!isDataAvailable || !isMeasurementTypesAvailable) {
+    if (!isDataAvailable) {
         return (
             <Loading/>
         );
@@ -184,7 +185,8 @@ export default function ViewRealTimeData() {
                 />
             </Stack>
             <Box sx={{ flexGrow: 1, marginTop: '40px', paddingBottom: '40px' }}>
-                <Grid container spacing={4}>
+                {!isMeasurementTypesAvailable? <Loading hasMarginTop/> :  
+                (<Grid container spacing={4}>
                     {deviceMeasurementTypes.includes(MeasurementTypes.LINEAR_ACCELERATION) && (
                     <React.Fragment>
                         <Grid item xs={4}>
@@ -275,7 +277,7 @@ export default function ViewRealTimeData() {
                         </Grid>
                     </React.Fragment>
                     )}
-                </Grid>
+                </Grid>)}
             </Box>
         </div>
     );
