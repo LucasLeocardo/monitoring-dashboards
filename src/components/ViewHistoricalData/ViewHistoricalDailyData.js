@@ -7,44 +7,16 @@ import Stack from '@mui/material/Stack';
 import Autocomplete from '@mui/material/Autocomplete';
 import * as EndPoints from '../../entities/endPoints'
 import Loading from '../Loading/Loading';
-import CardLoading from '../CardLoading/CardLoading';
 import TextField from '@mui/material/TextField';
 import { useParams } from "react-router-dom";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import { Line } from 'react-chartjs-2';
-import {
-    NewInfoCardContent,
-    InfoCardTitle
-  } from "../Info-elements/info-elements";
-import 'chartjs-adapter-date-fns';
-import {
-    Chart as ChartJS,
-    registerables
-  } from "chart.js";
-
-ChartJS.register(
-...registerables
-);
-
-const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    height: '600px',
-    color: theme.palette.text.secondary,
-  }));
+import VibrationHistoricalChart from '../HistoricalCharts/VibrationHistoricalChart';
+import SingleValueHistoricalChart from '../HistoricalCharts/SingleValueHistoricalChart';
+import * as MeasurementTypes from '../../entities/measurementTypes';
 
 export default function ViewHistoricalDailyData() {
 
@@ -53,15 +25,23 @@ export default function ViewHistoricalDailyData() {
     const navigate = useNavigate();
     const [isDeviceListAvailable, setIsDeviceListAvailable] = React.useState(false);
     const [deviceList, setDeviceList] =  React.useState([]);
-    const [vibrationDataList, setVibrationDataList] =  React.useState([]);
-    const [isVibrationDataAvailable, setIsVibrationDataAvailable] = React.useState(false);
+    const [linearAccelerationDataList, setLinearAccelerationDataList] =  React.useState([]);
+    const [isLinearAccelerationDataAvailable, setIsLinearAccelerationDataAvailable] = React.useState(false);
+    const [angularAccelerationDataList, setAngularAccelerationDataList] =  React.useState([]);
+    const [isAngularAccelerationDataAvailable, setIsAngularAccelerationDataAvailable] = React.useState(false);
     const [temperatureDataList, setTemperatureDataList] =  React.useState([]);
     const [isTemperatureDataAvailable, setIsTemperatureDataAvailable] = React.useState(false);
     const [humidityDataList, setHumidityDataList] =  React.useState([]);
     const [isHumidityDataAvailable, setIsHumidityDataAvailable] = React.useState(false);
+    const [rainfallLevelDataList, setRainfallLevelDataList] =  React.useState([]);
+    const [isRainfallLevelDataAvailable, setIsRainfallLevelDataAvailable] = React.useState(false);
+    const [poroPressureDataList, setPoroPressureDataList] =  React.useState([]);
+    const [isPoroPressureDataAvailable, setIsPoroPressureDataAvailable] = React.useState(false);
     const mounted = React.useRef();
     const [startDate, setStartDate] = React.useState(new Date());
     const [endDate, setEndDate] = React.useState(new Date());
+    const [deviceMeasurementTypes, setDeviceMeasurementTypes] =  React.useState([]);
+    const [isMeasurementTypesAvailable, setIsMeasurementTypesAvailable] = React.useState(false);
 
     React.useEffect(() => {
         if (!mounted.current) { 
@@ -69,9 +49,26 @@ export default function ViewHistoricalDailyData() {
             getActiveDevicesAsync();
             setSelectedPage('');
             mounted.current = true;
-        } 
-        getDaillyMeasurements();
-    }, [deviceId, startDate, endDate]);
+        } else {
+            getDaillyMeasurements();
+        }
+    }, [deviceMeasurementTypes.length, startDate, endDate]);
+
+    React.useEffect(() => {
+        setDeviceMeasurementTypes([]);
+        getDeviceMeasurementTypesAysnc();
+    }, [deviceId]);
+
+    const getDeviceMeasurementTypesAysnc = async () => {
+        await API(EndPoints.BASE_ENDPOINT, user.token).get(`${EndPoints.GET_DEVICE_MEASUREMENT_TYPES}?deviceId=${deviceId}`)
+            .then( response => {
+                if (response.status === ResponseStatus.SUCCESS) {
+                    setDeviceMeasurementTypes(response.data);
+                    setIsMeasurementTypesAvailable(true);
+                }
+            })
+            .catch(error => ( error ));
+    }
 
     const getActiveDevicesAsync = async () => {
         await API(EndPoints.BASE_ENDPOINT, user.token).get(EndPoints.GET_ACTIVE_DEVICES)
@@ -88,18 +85,45 @@ export default function ViewHistoricalDailyData() {
         const requestStartDate = startDate.toUTCString();
         const requestEndDate = endDate.toUTCString();
         const requestBody = {deviceId, startDate: requestStartDate, endDate: requestEndDate};
-        getDaillyVibrationDataAsync(requestBody);
-        getDaillyTemperatureDataAsync(requestBody);
-        getDaillyHumidityDataAsync(requestBody);
+        if (deviceMeasurementTypes.includes(MeasurementTypes.LINEAR_ACCELERATION)) {
+            getDaillyLinearAccelerationDataAsync(requestBody);
+        }
+        if (deviceMeasurementTypes.includes(MeasurementTypes.ANGULAR_ACCELERATION)) {
+            getDaillyAngularAccelerationDataAsync(requestBody);
+        }
+        if (deviceMeasurementTypes.includes(MeasurementTypes.TEMPERATURE)) {
+            getDaillyTemperatureDataAsync(requestBody);
+        }
+        if (deviceMeasurementTypes.includes(MeasurementTypes.HUMIDITY)) {
+            getDaillyHumidityDataAsync(requestBody);
+        }
+        if (deviceMeasurementTypes.includes(MeasurementTypes.RAINFALL_LEVEL)) {
+            getDaillyRainfallLevelDataAsync(requestBody);
+        }
+        if (deviceMeasurementTypes.includes(MeasurementTypes.PORO_PRESSURE)) {
+            getDaillyPoroPressureDataAsync(requestBody);
+        }
     }
 
-    const getDaillyVibrationDataAsync = async (requestBody) => {
-        setIsVibrationDataAvailable(false);
-        await API(EndPoints.BASE_ENDPOINT, user.token).post(EndPoints.GET_DAILLY_VIBRATION_DATA, requestBody)
+    const getDaillyLinearAccelerationDataAsync = async (requestBody) => {
+        setIsLinearAccelerationDataAvailable(false);
+        await API(EndPoints.BASE_ENDPOINT, user.token).post(EndPoints.GET_DAILLY_LINEAR_ACCELERATION_DATA, requestBody)
             .then( response => {
                 if (response.status === ResponseStatus.SUCCESS) {
-                    setVibrationDataList(response.data);
-                    setIsVibrationDataAvailable(true);
+                    setLinearAccelerationDataList(response.data);
+                    setIsLinearAccelerationDataAvailable(true);
+                }
+            })
+            .catch(error => ( error ));
+    }
+
+    const getDaillyAngularAccelerationDataAsync = async (requestBody) => {
+        setIsAngularAccelerationDataAvailable(false);
+        await API(EndPoints.BASE_ENDPOINT, user.token).post(EndPoints.GET_DAILLY_ANGULAR_ACCELERATION_DATA, requestBody)
+            .then( response => {
+                if (response.status === ResponseStatus.SUCCESS) {
+                    setAngularAccelerationDataList(response.data);
+                    setIsAngularAccelerationDataAvailable(true);
                 }
             })
             .catch(error => ( error ));
@@ -129,10 +153,33 @@ export default function ViewHistoricalDailyData() {
             .catch(error => ( error ));
     }
 
+    const getDaillyRainfallLevelDataAsync = async (requestBody) => {
+        setIsRainfallLevelDataAvailable(false);
+        await API(EndPoints.BASE_ENDPOINT, user.token).post(EndPoints.GET_DAILLY_RAINFALL_LEVEL_DATA, requestBody)
+            .then( response => {
+                if (response.status === ResponseStatus.SUCCESS) {
+                    setRainfallLevelDataList(response.data);
+                    setIsRainfallLevelDataAvailable(true);
+                }
+            })
+            .catch(error => ( error ));
+    }
+
+    const getDaillyPoroPressureDataAsync = async (requestBody) => {
+        setIsPoroPressureDataAvailable(false);
+        await API(EndPoints.BASE_ENDPOINT, user.token).post(EndPoints.GET_DAILLY_PORO_PRESSURE_DATA, requestBody)
+            .then( response => {
+                if (response.status === ResponseStatus.SUCCESS) {
+                    setPoroPressureDataList(response.data);
+                    setIsPoroPressureDataAvailable(true);
+                }
+            })
+            .catch(error => ( error ));
+    }
 
     const onSelectedDeviceChange = (event, values) => {
         if (values) {
-            navigate(`/view-historical-data/${values._id}`);
+            navigate(`/view-historical-daily-data/${values._id}`);
         }
     }
 
@@ -202,372 +249,98 @@ export default function ViewHistoricalDailyData() {
             </Stack>
             <Box sx={{ flexGrow: 1, marginTop: '40px', paddingBottom: '40px' }}>
                 <Grid container spacing={4}>
-                    <Grid item xs={12}>
-                        <Item>
-                            <InfoCardTitle>Linear acceleration (x, y, z)</InfoCardTitle>
-                            {!isVibrationDataAvailable? <CardLoading/> : (
-                            <NewInfoCardContent marginTop="30px">
-                                <Line
-                                    data={{
-                                        datasets: [{
-                                            label: 'Acceleration X',
-                                            data: vibrationDataList,
-                                            parsing: {
-                                                yAxisKey: 'acelX',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'red',
-                                            borderColor: 'red'
-                                        }, {
-                                            label: 'Acceleration Y',
-                                            data: vibrationDataList,
-                                            parsing: {
-                                                yAxisKey: 'acelY',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'blue',
-                                            borderColor: 'blue'
-                                        }, {
-                                            label: 'Acceleration Z',
-                                            data: vibrationDataList,
-                                            parsing: {
-                                                yAxisKey: 'acelZ',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'green',
-                                            borderColor: 'green'
-                                        }]
-                                    }}
-                                    options={{
-                                        maintainAspectRatio: false,
-                                        scales: {
-                                            x: {
-                                                type: 'time',
-                                                time: {
-                                                    unit: 'day'
-                                                }
-                                            },
-                                            y: {
-                                                ticks: {
-                                                    callback: function(value, index, ticks) {
-                                                        return value + ' m/s²';
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }}
-                                    height="100%"
-                                    width="100%"
-                                />
-                            </NewInfoCardContent>)}
-                        </Item>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Item>
-                            <InfoCardTitle>Angular acceleration (x, y, z)</InfoCardTitle>
-                            {!isVibrationDataAvailable? <CardLoading/> : (
-                            <NewInfoCardContent marginTop="30px">
-                                <Line
-                                    data={{
-                                        datasets: [{
-                                            label: 'Angular acceleration X',
-                                            data: vibrationDataList,
-                                            parsing: {
-                                                yAxisKey: 'alphaX',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'red',
-                                            borderColor: 'red'
-                                        }, {
-                                            label: 'Angular acceleration Y',
-                                            data: vibrationDataList,
-                                            parsing: {
-                                                yAxisKey: 'alphaY',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'blue',
-                                            borderColor: 'blue'
-                                        }, {
-                                            label: 'Angular acceleration Z',
-                                            data: vibrationDataList,
-                                            parsing: {
-                                                yAxisKey: 'alphaZ',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'green',
-                                            borderColor: 'green'
-                                        }]
-                                    }}
-                                    options={{
-                                        maintainAspectRatio: false,
-                                        scales: {
-                                            x: {
-                                                type: 'time',
-                                                time: {
-                                                    unit: 'day'
-                                                }
-                                            },
-                                            y: {
-                                                ticks: {
-                                                    callback: function(value, index, ticks) {
-                                                        return value + 'rad/s²';
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }}
-                                    height="100%"
-                                    width="100%"
-                                />
-                            </NewInfoCardContent>)}
-                        </Item>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Item>
-                            <InfoCardTitle>Humidity</InfoCardTitle>
-                            {!isHumidityDataAvailable? <CardLoading/> : (
-                            <NewInfoCardContent marginTop="30px">
-                                <Line
-                                    data={{
-                                        datasets: [{
-                                            label: 'H0',
-                                            data: humidityDataList,
-                                            parsing: {
-                                                yAxisKey: 'h0',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'red',
-                                            borderColor: 'red'
-                                        },{
-                                            label: 'H1',
-                                            data: humidityDataList,
-                                            parsing: {
-                                                yAxisKey: 'h1',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'blue',
-                                            borderColor: 'blue'
-                                        },{
-                                            label: 'H2',
-                                            data: humidityDataList,
-                                            parsing: {
-                                                yAxisKey: 'h2',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'green',
-                                            borderColor: 'green'
-                                        },{
-                                            label: 'H3',
-                                            data: humidityDataList,
-                                            parsing: {
-                                                yAxisKey: 'h3',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'yellow',
-                                            borderColor: 'yellow'
-                                        },{
-                                            label: 'H4',
-                                            data: humidityDataList,
-                                            parsing: {
-                                                yAxisKey: 'h4',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'gray',
-                                            borderColor: 'gray'
-                                        },{
-                                            label: 'H5',
-                                            data: humidityDataList,
-                                            parsing: {
-                                                yAxisKey: 'h5',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'black',
-                                            borderColor: 'black'
-                                        },{
-                                            label: 'H6',
-                                            data: humidityDataList,
-                                            parsing: {
-                                                yAxisKey: 'h6',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'pink',
-                                            borderColor: 'pink'
-                                        },{
-                                            label: 'H7',
-                                            data: humidityDataList,
-                                            parsing: {
-                                                yAxisKey: 'h7',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'orange',
-                                            borderColor: 'orange'
-                                        },{
-                                            label: 'H8',
-                                            data: humidityDataList,
-                                            parsing: {
-                                                yAxisKey: 'h8',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'brown',
-                                            borderColor: 'brown'
-                                        },{
-                                            label: 'H9',
-                                            data: humidityDataList,
-                                            parsing: {
-                                                yAxisKey: 'h9',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'purple',
-                                            borderColor: 'purple'
-                                        }]
-                                    }}
-                                    options={{
-                                        maintainAspectRatio: false,
-                                        scales: {
-                                            x: {
-                                                type: 'time',
-                                                time: {
-                                                    unit: 'day'
-                                                }
-                                            },
-                                            y: {
-                                                ticks: {
-                                                    callback: function(value, index, ticks) {
-                                                        return value + ' %';
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }}
-                                    height="100%"
-                                    width="100%"
-                                />
-                            </NewInfoCardContent>)}
-                        </Item>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Item>
-                            <InfoCardTitle>Temperature</InfoCardTitle>
-                            {!isTemperatureDataAvailable? <CardLoading/> : (
-                            <NewInfoCardContent marginTop="30px">
-                                <Line
-                                    data={{
-                                        datasets: [{
-                                            label: 'T0',
-                                            data: temperatureDataList,
-                                            parsing: {
-                                                yAxisKey: 't0',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'red',
-                                            borderColor: 'red'
-                                        },{
-                                            label: 'T1',
-                                            data: temperatureDataList,
-                                            parsing: {
-                                                yAxisKey: 't1',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'blue',
-                                            borderColor: 'blue'
-                                        },{
-                                            label: 'T2',
-                                            data: temperatureDataList,
-                                            parsing: {
-                                                yAxisKey: 't2',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'green',
-                                            borderColor: 'green'
-                                        },{
-                                            label: 'T3',
-                                            data: temperatureDataList,
-                                            parsing: {
-                                                yAxisKey: 't3',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'yellow',
-                                            borderColor: 'yellow'
-                                        },{
-                                            label: 'T4',
-                                            data: temperatureDataList,
-                                            parsing: {
-                                                yAxisKey: 't4',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'gray',
-                                            borderColor: 'gray'
-                                        },{
-                                            label: 'T5',
-                                            data: temperatureDataList,
-                                            parsing: {
-                                                yAxisKey: 't5',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'black',
-                                            borderColor: 'black'
-                                        },{
-                                            label: 'T6',
-                                            data: temperatureDataList,
-                                            parsing: {
-                                                yAxisKey: 't6',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'pink',
-                                            borderColor: 'pink'
-                                        },{
-                                            label: 'T7',
-                                            data: temperatureDataList,
-                                            parsing: {
-                                                yAxisKey: 't7',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'orange',
-                                            borderColor: 'orange'
-                                        },{
-                                            label: 'T8',
-                                            data: temperatureDataList,
-                                            parsing: {
-                                                yAxisKey: 't8',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'brown',
-                                            borderColor: 'brown'
-                                        },{
-                                            label: 'T9',
-                                            data: temperatureDataList,
-                                            parsing: {
-                                                yAxisKey: 't9',
-                                                xAxisKey: '_id'
-                                            },
-                                            backgroundColor: 'purple',
-                                            borderColor: 'purple'
-                                        }]
-                                    }}
-                                    options={{
-                                        maintainAspectRatio: false,
-                                        scales: {
-                                            x: {
-                                                type: 'time',
-                                                time: {
-                                                    unit: 'day'
-                                                }
-                                            },
-                                            y: {
-                                                ticks: {
-                                                    callback: function(value, index, ticks) {
-                                                        return value + ' °C';
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }}
-                                    height="100%"
-                                    width="100%"
-                                />
-                            </NewInfoCardContent>)}
-                        </Item>
-                    </Grid>
+                    {deviceMeasurementTypes.includes(MeasurementTypes.LINEAR_ACCELERATION) && (
+                    <React.Fragment>
+                        <Grid item xs={12}>
+                            <VibrationHistoricalChart
+                                cardTittle="Linear acceleration (x, y, z)"
+                                isVibrationDataAvailable={isLinearAccelerationDataAvailable}
+                                firstLabelName="Acceleration X"
+                                secondLabelName="Acceleration Y"
+                                thirdLabelName="Acceleration Z"
+                                vibrationDataList={linearAccelerationDataList}
+                                unit="m/s²"
+                                timeBasis="day"
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
+                    {deviceMeasurementTypes.includes(MeasurementTypes.ANGULAR_ACCELERATION) && (
+                    <React.Fragment>
+                        <Grid item xs={12}>
+                            <VibrationHistoricalChart
+                                cardTittle="Angular acceleration (x, y, z)"
+                                isVibrationDataAvailable={isAngularAccelerationDataAvailable}
+                                firstLabelName="Acceleration X"
+                                secondLabelName="Acceleration Y"
+                                thirdLabelName="Acceleration Z"
+                                vibrationDataList={angularAccelerationDataList}
+                                unit="rad/s²"
+                                timeBasis="day"
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
+                    {deviceMeasurementTypes.includes(MeasurementTypes.HUMIDITY) && (
+                    <React.Fragment>
+                        <Grid item xs={12}>
+                            <SingleValueHistoricalChart
+                                cardTittle="Humidity"
+                                isDataAvailable={isHumidityDataAvailable}
+                                labelName="Humidity data"
+                                dataList={humidityDataList}
+                                unit="%"
+                                timeBasis="day"
+                                chartColor="blue"
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
+                    {deviceMeasurementTypes.includes(MeasurementTypes.TEMPERATURE) && (
+                    <React.Fragment>
+                        <Grid item xs={12}>
+                            <SingleValueHistoricalChart
+                                cardTittle="Temperature"
+                                isDataAvailable={isTemperatureDataAvailable}
+                                labelName="Temperature data"
+                                dataList={temperatureDataList}
+                                unit="°C"
+                                timeBasis="day"
+                                chartColor="red"
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
+                    {deviceMeasurementTypes.includes(MeasurementTypes.RAINFALL_LEVEL) && (
+                    <React.Fragment>
+                        <Grid item xs={12}>
+                            <SingleValueHistoricalChart
+                                cardTittle="Rainfall level"
+                                isDataAvailable={isRainfallLevelDataAvailable}
+                                labelName="Rainfall level data"
+                                dataList={rainfallLevelDataList}
+                                unit="mm"
+                                timeBasis="day"
+                                chartColor="blue"
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
+                    {deviceMeasurementTypes.includes(MeasurementTypes.PORO_PRESSURE) && (
+                    <React.Fragment>
+                        <Grid item xs={12}>
+                            <SingleValueHistoricalChart
+                                cardTittle="Poro pressure"
+                                isDataAvailable={isPoroPressureDataAvailable}
+                                labelName="Poro pressure data"
+                                dataList={poroPressureDataList}
+                                unit="Pa"
+                                timeBasis="day"
+                                chartColor="green"
+                            />
+                        </Grid>
+                    </React.Fragment>
+                    )}
                 </Grid>
             </Box>
         </div>
