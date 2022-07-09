@@ -13,10 +13,18 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import Box from '@mui/material/Box';
+import Moment from 'moment';
 import Grid from '@mui/material/Grid';
 import * as MeasurementTypes from '../../entities/measurementTypes';
 import VibrationHistoricalChart from '../HistoricalCharts/VibrationHistoricalChart';
 import SingleValueHistoricalChart from '../HistoricalCharts/SingleValueHistoricalChart';
+
+const callbackTimeObj = { callback: (label, index, ticks) => {
+      const format = 'hh A'; // Change how you please
+      return new Moment(ticks[index].value)
+        .utcOffset(-21600 / 60)
+        .format(format);
+} }
 
 export default function ViewHistoricalHourlyData() {
 
@@ -261,6 +269,7 @@ export default function ViewHistoricalHourlyData() {
                                 vibrationDataList={linearAccelerationDataList}
                                 unit="m/s²"
                                 timeBasis="hour"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>
@@ -277,6 +286,7 @@ export default function ViewHistoricalHourlyData() {
                                 vibrationDataList={angularAccelerationDataList}
                                 unit="rad/s²"
                                 timeBasis="hour"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>
@@ -292,6 +302,7 @@ export default function ViewHistoricalHourlyData() {
                                 unit="%"
                                 timeBasis="hour"
                                 chartColor="blue"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>
@@ -307,6 +318,7 @@ export default function ViewHistoricalHourlyData() {
                                 unit="°C"
                                 timeBasis="hour"
                                 chartColor="red"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>
@@ -322,6 +334,7 @@ export default function ViewHistoricalHourlyData() {
                                 unit="mm"
                                 timeBasis="hour"
                                 chartColor="blue"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>
@@ -337,6 +350,7 @@ export default function ViewHistoricalHourlyData() {
                                 unit="Pa"
                                 timeBasis="hour"
                                 chartColor="green"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>

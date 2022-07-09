@@ -8,6 +8,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import * as EndPoints from '../../entities/endPoints'
 import Loading from '../Loading/Loading';
 import TextField from '@mui/material/TextField';
+import Moment from 'moment';
 import { useParams } from "react-router-dom";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -17,6 +18,13 @@ import Grid from '@mui/material/Grid';
 import VibrationHistoricalChart from '../HistoricalCharts/VibrationHistoricalChart';
 import SingleValueHistoricalChart from '../HistoricalCharts/SingleValueHistoricalChart';
 import * as MeasurementTypes from '../../entities/measurementTypes';
+
+const callbackTimeObj = { callback: (label, index, ticks) => {
+    const format = 'MMM DD'; // Change how you please
+    return new Moment(ticks[index].value)
+      .utcOffset(-21600 / 60)
+      .format(format);
+} }
 
 export default function ViewHistoricalDailyData() {
 
@@ -261,6 +269,7 @@ export default function ViewHistoricalDailyData() {
                                 vibrationDataList={linearAccelerationDataList}
                                 unit="m/s²"
                                 timeBasis="day"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>
@@ -277,6 +286,7 @@ export default function ViewHistoricalDailyData() {
                                 vibrationDataList={angularAccelerationDataList}
                                 unit="rad/s²"
                                 timeBasis="day"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>
@@ -292,6 +302,7 @@ export default function ViewHistoricalDailyData() {
                                 unit="%"
                                 timeBasis="day"
                                 chartColor="blue"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>
@@ -307,6 +318,7 @@ export default function ViewHistoricalDailyData() {
                                 unit="°C"
                                 timeBasis="day"
                                 chartColor="red"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>
@@ -322,6 +334,7 @@ export default function ViewHistoricalDailyData() {
                                 unit="mm"
                                 timeBasis="day"
                                 chartColor="blue"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>
@@ -337,6 +350,7 @@ export default function ViewHistoricalDailyData() {
                                 unit="Pa"
                                 timeBasis="day"
                                 chartColor="green"
+                                callbackTimeObj={callbackTimeObj}
                             />
                         </Grid>
                     </React.Fragment>

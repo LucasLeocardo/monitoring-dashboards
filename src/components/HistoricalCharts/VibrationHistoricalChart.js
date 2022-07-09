@@ -35,7 +35,7 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export default function VibrationHistoricalChart(props) {
 
-    const { cardTittle, isVibrationDataAvailable, firstLabelName, secondLabelName, thirdLabelName, vibrationDataList, unit, timeBasis } = props;
+    const { cardTittle, isVibrationDataAvailable, firstLabelName, secondLabelName, thirdLabelName, vibrationDataList, unit, timeBasis, callbackTimeObj } = props;
 
     return (
         <React.Fragment>  
@@ -81,7 +81,8 @@ export default function VibrationHistoricalChart(props) {
                                     type: 'time',
                                     time: {
                                         unit: timeBasis
-                                    }
+                                    },
+                                    ticks: callbackTimeObj
                                 },
                                 y: {
                                     ticks: {
@@ -109,6 +110,7 @@ VibrationHistoricalChart.propTypes = {
     thirdLabelName: PropTypes.string.isRequired,
     vibrationDataList: PropTypes.array.isRequired,
     unit: PropTypes.string.isRequired,
-    timeBasis: PropTypes.string.isRequired
+    timeBasis: PropTypes.string.isRequired,
+    callbackTimeObj: PropTypes.object
 };
 

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
+import Moment from 'moment';
 import {
     NewInfoCardContent,
     InfoCardTitle
@@ -35,7 +36,7 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export default function SingleValueHistoricalChart(props) {
 
-    const { cardTittle, isDataAvailable, labelName, dataList, unit, timeBasis, chartColor } = props;
+    const { cardTittle, isDataAvailable, labelName, dataList, unit, timeBasis, chartColor, callbackTimeObj } = props;
 
     return (
         <React.Fragment>  
@@ -63,7 +64,8 @@ export default function SingleValueHistoricalChart(props) {
                                     type: 'time',
                                     time: {
                                         unit: timeBasis
-                                    }
+                                    },
+                                    ticks: callbackTimeObj
                                 },
                                 y: {
                                     ticks: {
@@ -90,6 +92,7 @@ SingleValueHistoricalChart.propTypes = {
     dataList: PropTypes.array.isRequired,
     unit: PropTypes.string.isRequired,
     timeBasis: PropTypes.string.isRequired,
-    chartColor: PropTypes.string.isRequired
+    chartColor: PropTypes.string.isRequired,
+    callbackTimeObj: PropTypes.object
 };
 
