@@ -237,7 +237,7 @@ export default function ViewHistoricalHourlyData() {
                 <Stack spacing={3} sx={{ width: '600px', display: 'flex', flexDirection: 'row', justifyContent: 'space-around'}}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <TimePicker
-                            label="Start date"
+                            label="Start time (Yesterday)"
                             value={startDate}
                             onChange={(newValue) => {
                                 onStarDateChange(newValue);
@@ -245,7 +245,7 @@ export default function ViewHistoricalHourlyData() {
                             renderInput={(params) => <TextField {...params} />}
                         />
                         <TimePicker
-                            label="End date"
+                            label="End time (Today)"
                             value={endDate}
                             onChange={(newValue) => {
                                 onEndDateChange(newValue);
