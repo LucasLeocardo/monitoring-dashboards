@@ -96,7 +96,7 @@ export default function ViewHistoricalHourlyData() {
     }
 
     const getHourlyMeasurements = () => {
-        if (!isNaN(startDate) && !isNaN(endDate) && startDate.getDay() >= minPickerDate.getDay() && endDate.getDay() >= minPickerDate.getDay()) {
+        if (!isNaN(startDate) && !isNaN(endDate) && startDate.getDate() >= minPickerDate.getDate() && endDate.getDate() >= minPickerDate.getDate()) {
             const requestStartDate = startDate.toISOString();
             const requestEndDate = endDate.toISOString();
             const requestBody = {deviceId, startDate: requestStartDate, endDate: requestEndDate};
