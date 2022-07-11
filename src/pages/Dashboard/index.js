@@ -148,7 +148,7 @@ function DashboardContent({ content }) {
               noWrap
               sx={{ flexGrow: 1 }}
             >
-              Slope monitoring system
+              Monitoring system
             </Typography>
             <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
