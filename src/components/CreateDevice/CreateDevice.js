@@ -69,6 +69,24 @@ const longitudeMaskCustom = React.forwardRef(function TextMaskCustom(props, ref)
   );
 });
 
+const numberMaskCustom = React.forwardRef(function TextMaskCustom(props, ref) {
+  const { onChange, ...other } = props;
+  return (
+    <IMaskInput
+      {...other}
+      mask={Number}
+      scale={10}
+      radix="."
+      digits={1}
+      min={-90}
+      max={90}
+      inputRef={ref}
+      onAccept={(value) => onChange({ target: { name: props.name, value } })}
+      overwrite
+    />
+  );
+});
+
 longitudeMaskCustom.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
@@ -96,6 +114,7 @@ export default function CreateDevice() {
   const [isSubmitEnabled, setIsSubmitEnabled] = React.useState(true);
   const [measurementTypeList, setMeasurementTypeList] = React.useState([]);
   const [selectedMeasurementTypes, setSelectedMeasurementTypes] = React.useState([]);
+  const [selectedMeasuredDataTypesObj, setSelectedMeasuredDataTypesObj] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const navigate = useNavigate();
 
@@ -112,16 +131,24 @@ export default function CreateDevice() {
     setLongitudeValue(event.target.value);
   };
 
+  const handleSensorGainChange = (event, index) => {
+    const copySelectedMeasuredDataTypesObj = selectedMeasuredDataTypesObj.slice();;
+    copySelectedMeasuredDataTypesObj[index].gain = event.target.value;
+    setSelectedMeasuredDataTypesObj(copySelectedMeasuredDataTypesObj);
+  };
+
+  const handleSensorOffsetChange = (event, index) => {
+    const copySelectedMeasuredDataTypesObj = selectedMeasuredDataTypesObj.slice();;
+    copySelectedMeasuredDataTypesObj[index].offSet = event.target.value;
+    setSelectedMeasuredDataTypesObj(copySelectedMeasuredDataTypesObj);
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const name = data.get('name');
-    if (name && latitudeValue && longitudeValue && selectedMeasurementTypes.length > 0) {
-        const measuredDataTypes =  measurementTypeList.filter(measurementType => {
-          const measurementTypeLabelKey =  measurementType.name + ' (' + measurementType.unit + ')';
-          return selectedMeasurementTypes.some(selectedMeasurementType => selectedMeasurementType === measurementTypeLabelKey);
-        });
-        const request = { name, latitude: Number(latitudeValue), longitude: Number(longitudeValue), measuredDataTypes };
+    if (name && latitudeValue && longitudeValue && selectedMeasuredDataTypesObj.length > 0) {
+        const request = { name, latitude: Number(latitudeValue), longitude: Number(longitudeValue), measuredDataTypes: selectedMeasuredDataTypesObj };
         addNewDevice(request);
     }
     else {
@@ -148,9 +175,18 @@ export default function CreateDevice() {
     const {
       target: { value },
     } = event;
+    const measuredDataTypes =  measurementTypeList.filter(measurementType => {
+      const measurementTypeLabelKey =  measurementType.name + ' (' + measurementType.unit + ')';
+      if (value === 'string') {
+        return value === measurementTypeLabelKey;
+      } else {
+        return value.some(selectedMeasurementType => selectedMeasurementType === measurementTypeLabelKey);
+      }
+    });
     setSelectedMeasurementTypes(
       typeof value === 'string' ? value.split(',') : value,
     );
+    setSelectedMeasuredDataTypesObj(measuredDataTypes);
   };
 
   async function getAllMeasurementTypes() {
@@ -276,11 +312,11 @@ export default function CreateDevice() {
                     )}
                     MenuProps={MenuProps}
                   >
-                    {measurementTypeList.map((measurementType) => {
+                    {measurementTypeList.map((measurementType, index) => {
                       const measurementTypeLabel = measurementType.name + ' (' + measurementType.unit + ')';
                       return (
                         <MenuItem
-                          key={measurementType._id}
+                          key={"Menu item: " + String(index)}
                           value={measurementTypeLabel}
                           style={getStyles(measurementTypeLabel, selectedMeasurementTypes, theme)}
                         >
@@ -291,6 +327,47 @@ export default function CreateDevice() {
                   </Select>
                 </FormControl>
               </Grid>
+              {selectedMeasuredDataTypesObj.map((selectedMeasuredDataType, index) => {
+                return (
+                  <React.Fragment key={"Fragment: " + String(index)}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        id={"Sensor type: " + String(index)}
+                        label="Sensor type"
+                        value={selectedMeasuredDataType.name}
+                        disabled
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <TextField
+                        fullWidth
+                        id={"Gain: " + String(index)}
+                        label="Gain"
+                        value={selectedMeasuredDataType.gain ? selectedMeasuredDataType.gain : ''}
+                        onChange={(event) => handleSensorGainChange(event, index)}
+                        disabled={!isFormFieldsEnabled}
+                        InputProps={{
+                          inputComponent: numberMaskCustom,
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <TextField
+                        fullWidth
+                        label="Offset"
+                        id={"Offset: " + String(index)}
+                        value={selectedMeasuredDataType.offSet ? selectedMeasuredDataType.offSet : ''}
+                        onChange={(event) => handleSensorOffsetChange(event, index)}
+                        disabled={!isFormFieldsEnabled}
+                        InputProps={{
+                          inputComponent: numberMaskCustom,
+                        }}
+                      />
+                    </Grid>
+                  </React.Fragment>
+                 );
+              })}
               <Grid item xs={12}>
                 <TextField
                   fullWidth
